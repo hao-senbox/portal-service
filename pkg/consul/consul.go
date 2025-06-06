@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	serviceName = "main-service"
+	serviceName = "portal-service"
 	ttl         = time.Second * 15
-	checkId     = "main-service-health-check"
+	checkId     = "portal-service-health-check"
 )
 
 var (

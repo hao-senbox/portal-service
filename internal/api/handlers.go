@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"portal/internal/models"
 	"portal/internal/service"

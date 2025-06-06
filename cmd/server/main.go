@@ -10,9 +10,11 @@ import (
 	"portal/internal/api"
 	"portal/internal/repository"
 	"portal/internal/service"
+	"portal/pkg/consul"
 	"portal/pkg/zap"
 	"syscall"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -35,9 +37,9 @@ func main() {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
 
-	// consulConn := consul.NewConsulConn(logger, cfg)
-	// consulClient := consulConn.Connect()
-	// defer consulConn.Deregister()
+	consulConn := consul.NewConsulConn(logger, cfg)
+	consulConn.Connect()
+	defer consulConn.Deregister()
 
 	// Connect to MongoDB
 	mongoClient, err := connectToMongoDB(cfg.MongoURI)

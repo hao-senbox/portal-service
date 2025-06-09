@@ -69,12 +69,19 @@ func (s *portalService) CreateStudentActivity(ctx context.Context, req *models.R
 }
 
 func (s *portalService) GetAllStudentActivity(ctx context.Context, studentID string, date string) ([]*models.StudentActivity, error) {
-
-	parsedDate, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		return nil, fmt.Errorf("invalid date format: %w", err)
-	}
 	
+	var parsedDate *time.Time
+
+	if date != "" {
+		t, err := time.Parse("2006-01-02", date)
+		if err != nil {
+			return nil, fmt.Errorf("invalid date format: %w", err)
+		}
+		parsedDate = &t
+	}
+
+	fmt.Printf("parsedDate: %v\n", parsedDate)
+
 	activities, err := s.repoPortal.GetAllStudentActivity(ctx, studentID, parsedDate)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get student activity: %w", err)
@@ -82,3 +89,4 @@ func (s *portalService) GetAllStudentActivity(ctx context.Context, studentID str
 
 	return activities, nil
 }
+

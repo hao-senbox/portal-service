@@ -4,13 +4,14 @@ import (
 	"context"
 	"portal/internal/models"
 	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type PortalRepository interface {
 	CreateStudentActivity(ctx context.Context, activityStudent *models.StudentActivity) error	
-	GetAllStudentActivity(ctx context.Context, studentID string, date time.Time) ([]*models.StudentActivity, error)
+	GetAllStudentActivity(ctx context.Context, studentID string, date *time.Time) ([]*models.StudentActivity, error)
 }
 
 type portalRepository struct {
@@ -33,12 +34,16 @@ func (r *portalRepository) CreateStudentActivity(ctx context.Context, activitySt
 	return nil
 }
 
-func (r *portalRepository) GetAllStudentActivity(ctx context.Context, studentID string, date time.Time) ([]*models.StudentActivity, error) {
+func (r *portalRepository) GetAllStudentActivity(ctx context.Context, studentID string, date *time.Time) ([]*models.StudentActivity, error) {
 
 	var activities []*models.StudentActivity
 
-	filter := bson.M{"student_id": studentID, "date": date}
+	filter := bson.M{"student_id": studentID}
 
+	if date != nil {
+		filter["date"] = date
+	}
+	
 	cursor, err := r.collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err

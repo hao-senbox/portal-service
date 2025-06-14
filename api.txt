@@ -1,2 +1,2 @@
-/api/v1/portal/student
-/api/v1/portal/:student_id
+POST    /api/v1/portal/student
+GET     /api/v1/portal

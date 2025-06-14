@@ -24,7 +24,7 @@ func RegisterHandlers(router *gin.Engine, portalService service.PortalService) {
 	portalGroup := router.Group("/api/v1/portal")
 	{
 		portalGroup.POST("/student", handlers.CreateStudentActivity)
-		portalGroup.GET("/", handlers.GetAllStudentActivity)
+		portalGroup.GET("", handlers.GetAllStudentActivity)
 	}
 }
 

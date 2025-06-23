@@ -28,12 +28,13 @@ type ActivitySummaryData struct {
 }
 
 type ActivityDetail struct {
-	SessionID   string                `json:"session_id,omitempty"`
-	Data        []StudentActivityData `json:"data"`
-	SubmittedAt time.Time             `json:"submitted_at"`
-	AssignedBy  string                `json:"assigned_by"`
-	CreatedAt   time.Time             `json:"created_at"`
-	UpdatedAt   time.Time             `json:"updated_at"`
+	SessionID    string                `json:"session_id,omitempty"`
+	TypeActivity string                `json:"type_activity"`
+	Data         []StudentActivityData `json:"data"`
+	SubmittedAt  time.Time             `json:"submitted_at"`
+	AssignedBy   string                `json:"assigned_by"`
+	CreatedAt    time.Time             `json:"created_at"`
+	UpdatedAt    time.Time             `json:"updated_at"`
 }
 
 const (

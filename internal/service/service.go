@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type PortalService interface {
@@ -52,6 +54,7 @@ func (s *portalService) CreateStudentActivity(ctx context.Context, req *models.R
 	}
 
 	studentActivity := &models.StudentActivity{
+		ID:           primitive.NewObjectID(),
 		StudentID:    req.StudentID,
 		TypeActivity: req.TypeActivity,
 		Date:         dateParse,
@@ -137,11 +140,13 @@ func (s *portalService) groupActivitiesByType(activities []*models.StudentActivi
 		var details []models.ActivityDetail
 		for _, activity := range typeActivities {
 			details = append(details, models.ActivityDetail{
-				Data:        activity.Data,
-				SubmittedAt: activity.SubmittedAt,
-				AssignedBy:  activity.AssignedBy,
-				CreatedAt:   activity.CreatedAt,
-				UpdatedAt:   activity.UpdatedAt,
+				SessionID:    activity.ID.Hex(),
+				TypeActivity: activity.TypeActivity,
+				Data:         activity.Data,
+				SubmittedAt:  activity.SubmittedAt,
+				AssignedBy:   activity.AssignedBy,
+				CreatedAt:    activity.CreatedAt,
+				UpdatedAt:    activity.UpdatedAt,
 			})
 		}
 
@@ -163,7 +168,7 @@ func (s *portalService) groupActivitiesByType(activities []*models.StudentActivi
 
 func (s *portalService) generateStatistics(typeActivity string, details []models.ActivityDetail) map[string]interface{} {
 	switch typeActivity {
-	case "sleep-rest":
+	case "sleep_rest":
 		return s.generateSleepRestStatistics(details)
 	case "toileting":
 		return s.generateToiletingStatistics(details)

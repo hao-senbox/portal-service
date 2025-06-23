@@ -2,9 +2,12 @@ package models
 
 import (
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type StudentActivity struct {
+	ID           primitive.ObjectID    `bson:"_id, omitempty" json:"id"`
 	StudentID    string                `bson:"student_id, omitempty" json:"student_id"`
 	TypeActivity string                `bson:"type_activity" json:"type_activity"`
 	Date         time.Time             `bson:"date" json:"date"`

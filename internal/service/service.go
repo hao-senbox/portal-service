@@ -250,13 +250,13 @@ func (s *portalService) generateSleepRestStatistics(details []models.ActivityDet
 	for _, detail := range details {
 		for _, d := range detail.Data {
 			switch d.Key {
-			case "durian_of_sleep":
+			case "duration_of_sleep":
 				if val, err := strconv.Atoi(d.Value); err == nil {
 					totalSleep += val
 				} else {
 					fmt.Printf("invalid durian_of_sleep: %v\n", d.Value)
 				}
-			case "durian_of_rest":
+			case "duration_of_rest":
 				if val, err := strconv.Atoi(d.Value); err == nil {
 					totalRest += val
 				} else {

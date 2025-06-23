@@ -5,12 +5,18 @@ import (
 )
 
 type StudentActivity struct {
-	StudentID    string                 `bson:"student_id, omitempty" json:"student_id"`
-	TypeActivity string                 `bson:"type_activity" json:"type_activity"`
-	Date         time.Time              `bson:"date" json:"date"`
-	Data         map[string]interface{} `bson:"data" json:"data"`
-	SubittedAt   time.Time              `bson:"submitted_at" json:"submitted_at"`
-	CreatdBy     string                 `bson:"created_by" json:"created_by"`
-	CreatedAt    time.Time              `bson:"created_at" json:"created_at"`
-	UpdatedAt    time.Time              `bson:"updated_at" json:"updated_at"`
+	StudentID    string                `bson:"student_id, omitempty" json:"student_id"`
+	TypeActivity string                `bson:"type_activity" json:"type_activity"`
+	Date         time.Time             `bson:"date" json:"date"`
+	Data         []StudentActivityData `bson:"data" json:"data"`
+	SubmittedAt  time.Time             `bson:"submitted_at" json:"submitted_at"`
+	AssignedBy   string                `bson:"assigned_by" json:"assigned_by"`
+	CreatedAt    time.Time             `bson:"created_at" json:"created_at"`
+	UpdatedAt    time.Time             `bson:"updated_at" json:"updated_at"`
+}
+
+type StudentActivityData struct {
+	Key   string `json:"key"`
+	Label string `json:"label"`
+	Value string `json:"value"`
 }

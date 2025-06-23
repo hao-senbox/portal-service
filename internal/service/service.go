@@ -182,7 +182,7 @@ func (s *portalService) generateToiletingStatistics(details []models.ActivityDet
 	for _, detail := range details {
 		for _, d := range detail.Data {
 			switch d.Key {
-			case "number_1_pee":
+			case "number_1":
 				value := strings.ToLower(d.Value)
 				if strings.Contains(value, "nothing") {
 					number1 -= 1
@@ -191,7 +191,7 @@ func (s *portalService) generateToiletingStatistics(details []models.ActivityDet
 				} else if strings.Contains(value, "big") {
 					number1 += 1
 				}
-			case "number_2_poo":
+			case "number_2":
 				value := strings.ToLower(d.Value)
 				if strings.Contains(value, "nothing") {
 					if number2 == 0 {
@@ -204,7 +204,7 @@ func (s *portalService) generateToiletingStatistics(details []models.ActivityDet
 				} else if strings.Contains(value, "big") {
 					number2 += 1
 				}
-			case "number_3_menstruation":
+			case "number_3":
 				value := strings.ToLower(d.Value)
 				if strings.Contains(value, "nothing") {
 					if number3 == 0 {
@@ -287,5 +287,5 @@ func (s *portalService) parseSecondToHoursAndMinutes(seconds int) string {
 	}
 
 	return result
-	
+
 }

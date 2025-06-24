@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"math"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -189,7 +191,50 @@ func (s *portalService) generateStatistics(typeActivity string, details []models
 }
 
 func (s *portalService) generateFoodStatistics(details []models.ActivityDetail) map[string]interface{} {
-	return nil
+
+	dishConsumption := make(map[string][]float64)
+
+	for _, detail := range details {
+		for _, d := range detail.Data {
+			if strings.HasPrefix(d.Key, "what_is_the_name_of_the") && strings.HasSuffix(d.Key, "_dish") {
+				dishName := d.Value
+
+				dishNumber := strings.TrimPrefix(d.Key, "what_is_the_name_of_the_")
+				dishNumber = strings.TrimSuffix(dishNumber, "_dish")
+				consumtionKey := fmt.Sprintf("how_much_the_student_ate_the_%s_dish", dishNumber)
+
+				for _, consumptionData := range detail.Data {
+					if consumptionData.Key == consumtionKey {
+						if consumption, err := strconv.ParseFloat(consumptionData.Value, 64); err == nil {
+							dishConsumption[dishName] = append(dishConsumption[dishName], consumption)
+						}
+						break
+					}
+				}
+			}
+		}
+	}
+	
+	var summary []map[string]interface{}
+
+	for dishName, consumption := range dishConsumption {
+		if len(consumption) > 0 {
+			sum := 0.0
+			for _, c := range consumption {
+				sum += c
+			}
+			average := sum / float64(len(consumption))	
+			summary = append(summary, map[string]interface{}{
+				"dish_name": dishName,
+				"total":     math.Round(average*100) / 100,
+			})
+		}
+	}
+
+	return map[string]interface{}{
+		"dishes": summary,
+	}
+
 }
 
 func (s *portalService) generateExerciseStatistics(details []models.ActivityDetail) map[string]interface{} {
@@ -212,7 +257,6 @@ func (s *portalService) generateExerciseStatistics(details []models.ActivityDeta
 }
 
 func (s *portalService) generateSocialPlayStatistics(details []models.ActivityDetail) map[string]interface{} {
-
 	return nil
 }
 
@@ -221,7 +265,50 @@ func (s *portalService) generateWorkStatistics(details []models.ActivityDetail) 
 }
 
 func (s *portalService) generateFluidsStatistics(details []models.ActivityDetail) map[string]interface{} {
-	return nil
+
+	var totalWater int
+	var totalJuice int
+	var totalSmoothies int
+	var totalMilk int
+	var totalOther int
+
+	for _, detail := range details {
+		for _, d := range detail.Data {
+			switch d.Key {
+			case "water":
+				fmt.Printf("water: %v\n", d.Value)
+				if value, ok := s.extractNumberInParentheses(d.Value); ok {
+					fmt.Printf("water: %v\n", value)
+					totalWater += value
+				}
+			case "juice":
+				if value, ok := s.extractNumberInParentheses(d.Value); ok {
+					totalJuice += value
+				}
+			case "smoothie":
+				if value, ok := s.extractNumberInParentheses(d.Value); ok {
+					totalSmoothies += value
+				}
+			case "milk":
+				if value, ok := s.extractNumberInParentheses(d.Value); ok {
+					totalMilk += value
+				}
+			case "other_fluid":
+				if value, ok := s.extractNumberInParentheses(d.Value); ok {
+					totalOther += value
+				} 
+			}
+		}
+	}
+
+	return map[string]interface{}{
+		"water":     fmt.Sprintf("%dml", totalWater),
+		"juice":     fmt.Sprintf("%dml", totalJuice),
+		"smoothies": fmt.Sprintf("%dml", totalSmoothies),
+		"milk":      fmt.Sprintf("%dml", totalMilk),
+		"other":     fmt.Sprintf("%dml", totalOther),
+	}
+	
 }
 
 func (s *portalService) generateToiletingStatistics(details []models.ActivityDetail) map[string]interface{} {
@@ -341,4 +428,22 @@ func (s *portalService) parseSecondToHoursAndMinutes(seconds int) string {
 
 	return result
 
+}
+
+func (s *portalService) extractNumberInParentheses(input string) (int, bool) {
+
+	if strings.ToLower(strings.TrimSpace(input)) == "no drink" {
+		return 0, false
+	}
+
+	re := regexp.MustCompile(`\((\d+)[^\d]*\)`)
+	match := re.FindStringSubmatch(input)
+
+	if len(match) == 2 {
+		if num, err := strconv.Atoi(match[1]); err == nil {
+			return num, true
+		}
+	}
+
+	return 0, false
 }

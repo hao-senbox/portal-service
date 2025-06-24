@@ -287,10 +287,10 @@ func (s *portalService) generateToiletingStatistics(details []models.ActivityDet
 
 	max = number1 + number2 + number3
 	return map[string]interface{}{
-		"total_number_1": number1,
-		"total_number_2": number2,
-		"total_number_3": number3,
-		"max":            max,
+		"number_1": number1,
+		"number_2": number2,
+		"number_3": number3,
+		"max":      max,
 	}
 }
 
@@ -319,9 +319,9 @@ func (s *portalService) generateSleepRestStatistics(details []models.ActivityDet
 	}
 
 	return map[string]interface{}{
-		"total_sleep":      s.parseSecondToHoursAndMinutes(totalSleep),
-		"total_rest":       s.parseSecondToHoursAndMinutes(totalRest),
-		"total_sleep_rest": s.parseSecondToHoursAndMinutes(totalSleep + totalRest),
+		"sleep": s.parseSecondToHoursAndMinutes(totalSleep),
+		"rest":  s.parseSecondToHoursAndMinutes(totalRest),
+		"total": s.parseSecondToHoursAndMinutes(totalSleep + totalRest),
 	}
 
 }

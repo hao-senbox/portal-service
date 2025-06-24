@@ -3,11 +3,12 @@ package service
 import (
 	"context"
 	"fmt"
-	"portal/internal/models"
-	"portal/internal/repository"
 	"strconv"
 	"strings"
 	"time"
+
+	"portal/internal/models"
+	"portal/internal/repository"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -172,9 +173,55 @@ func (s *portalService) generateStatistics(typeActivity string, details []models
 		return s.generateSleepRestStatistics(details)
 	case "toileting":
 		return s.generateToiletingStatistics(details)
+	case "fluids":
+		return s.generateFluidsStatistics(details)
+	case "work":
+		return s.generateWorkStatistics(details)
+	case "exercise":
+		return s.generateExerciseStatistics(details)
+	case "social_play":
+		return s.generateSocialPlayStatistics(details)
+	case "food":
+		return s.generateFoodStatistics(details)
 	default:
 		return nil
 	}
+}
+
+func (s *portalService) generateFoodStatistics(details []models.ActivityDetail) map[string]interface{} {
+	return nil
+}
+
+func (s *portalService) generateExerciseStatistics(details []models.ActivityDetail) map[string]interface{} {
+
+	var total int
+	for _, detail := range details {
+		for _, d := range detail.Data {
+			if d.Key == "duration_of_session" {
+				if val, err := strconv.Atoi(d.Value); err == nil {
+					total += val
+				}
+			}
+		}
+	}
+
+	return map[string]interface{}{
+		"total": total,
+	}
+
+}
+
+func (s *portalService) generateSocialPlayStatistics(details []models.ActivityDetail) map[string]interface{} {
+
+	return nil
+}
+
+func (s *portalService) generateWorkStatistics(details []models.ActivityDetail) map[string]interface{} {
+	return nil
+}
+
+func (s *portalService) generateFluidsStatistics(details []models.ActivityDetail) map[string]interface{} {
+	return nil
 }
 
 func (s *portalService) generateToiletingStatistics(details []models.ActivityDetail) map[string]interface{} {
@@ -272,8 +319,9 @@ func (s *portalService) generateSleepRestStatistics(details []models.ActivityDet
 	}
 
 	return map[string]interface{}{
-		"total_sleep": s.parseSecondToHoursAndMinutes(totalSleep),
-		"total_rest":  s.parseSecondToHoursAndMinutes(totalRest),
+		"total_sleep":      s.parseSecondToHoursAndMinutes(totalSleep),
+		"total_rest":       s.parseSecondToHoursAndMinutes(totalRest),
+		"total_sleep_rest": s.parseSecondToHoursAndMinutes(totalSleep + totalRest),
 	}
 
 }

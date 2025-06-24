@@ -206,7 +206,7 @@ func (s *portalService) generateExerciseStatistics(details []models.ActivityDeta
 	}
 
 	return map[string]interface{}{
-		"total": total,
+		"total": s.parseSecondToHoursAndMinutes(total),
 	}
 
 }

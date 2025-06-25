@@ -323,35 +323,30 @@ func (s *portalService) generateToiletingStatistics(details []models.ActivityDet
 		for _, d := range detail.Data {
 			switch d.Key {
 			case "number_1":
+				max++
 				value := strings.ToLower(d.Value)
 				if strings.Contains(value, "nothing") {
-					number1 -= 1
+					number1 += 0
 				} else if strings.Contains(value, "small") {
 					number1 += 1
 				} else if strings.Contains(value, "big") {
 					number1 += 1
 				}
 			case "number_2":
+				max++
 				value := strings.ToLower(d.Value)
 				if strings.Contains(value, "nothing") {
-					if number2 == 0 {
-						number2 = 0
-					} else {
-						number2 -= 1
-					}
+					number2 += 0
 				} else if strings.Contains(value, "small") {
 					number2 += 1
 				} else if strings.Contains(value, "big") {
 					number2 += 1
 				}
 			case "number_3":
+				max++
 				value := strings.ToLower(d.Value)
 				if strings.Contains(value, "nothing") {
-					if number3 == 0 {
-						number3 = 0
-					} else {
-						number3 -= 1
-					}
+					number3 += 0
 				} else if strings.Contains(value, "small") {
 					number3 += 1
 				} else if strings.Contains(value, "big") {
@@ -361,19 +356,6 @@ func (s *portalService) generateToiletingStatistics(details []models.ActivityDet
 		}
 	}
 
-	if number1 < 0 {
-		number1 = 0
-	}
-
-	if number2 < 0 {
-		number2 = 0
-	}
-
-	if number3 < 0 {
-		number3 = 0
-	}
-
-	max = number1 + number2 + number3
 	return map[string]interface{}{
 		"number_1": number1,
 		"number_2": number2,

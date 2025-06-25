@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -55,6 +55,8 @@ func (s *portalService) CreateStudentActivity(ctx context.Context, req *models.R
 	if req.AssignedBy == "" {
 		return fmt.Errorf("assigned by cannot be empty")
 	}
+
+	fmt.Printf("data : %v\n", req.Data)
 
 	studentActivity := &models.StudentActivity{
 		ID:           primitive.NewObjectID(),
@@ -276,25 +278,24 @@ func (s *portalService) generateFluidsStatistics(details []models.ActivityDetail
 		for _, d := range detail.Data {
 			switch d.Key {
 			case "water":
-				fmt.Printf("water: %v\n", d.Value)
-				if value, ok := s.extractNumberInParentheses(d.Value); ok {
+				if value, ok := s.parseFluidsValue(d.Value); ok {
 					fmt.Printf("water: %v\n", value)
 					totalWater += value
 				}
 			case "juice":
-				if value, ok := s.extractNumberInParentheses(d.Value); ok {
+				if value, ok := s.parseFluidsValue(d.Value); ok {
 					totalJuice += value
 				}
 			case "smoothie":
-				if value, ok := s.extractNumberInParentheses(d.Value); ok {
+				if value, ok := s.parseFluidsValue(d.Value); ok {
 					totalSmoothies += value
 				}
 			case "milk":
-				if value, ok := s.extractNumberInParentheses(d.Value); ok {
+				if value, ok := s.parseFluidsValue(d.Value); ok {
 					totalMilk += value
 				}
 			case "other_fluid":
-				if value, ok := s.extractNumberInParentheses(d.Value); ok {
+				if value, ok := s.parseFluidsValue(d.Value); ok {
 					totalOther += value
 				} 
 			}
@@ -430,19 +431,24 @@ func (s *portalService) parseSecondToHoursAndMinutes(seconds int) string {
 
 }
 
-func (s *portalService) extractNumberInParentheses(input string) (int, bool) {
-
-	if strings.ToLower(strings.TrimSpace(input)) == "no drink" {
-		return 0, false
+func (s *portalService) parseFluidsValue(input string) (int, bool) {
+	type FluidDetails struct {
+		Capacity     int `json:"capacity"`      // Dung tích nước
+		ActualPoured int `json:"actual_poured"` // Dung tích nước rót thực tế  
+		Consumed     int `json:"consumed"`      // Học sinh uống bao nhiêu
+		Remaining    int `json:"remaining"`     // Còn lại bao nhiêu
 	}
 
-	re := regexp.MustCompile(`\((\d+)[^\d]*\)`)
-	match := re.FindStringSubmatch(input)
-
-	if len(match) == 2 {
-		if num, err := strconv.Atoi(match[1]); err == nil {
-			return num, true
+	if strings.Contains(input, "{") {
+		
+		var fluidDetails FluidDetails
+		err := json.Unmarshal([]byte(input), &fluidDetails)
+		if err != nil {
+			return 0, false
 		}
+
+		return fluidDetails.Consumed, true
+
 	}
 
 	return 0, false

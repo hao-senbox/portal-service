@@ -2,20 +2,22 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"portal/config"
-	"portal/internal/api"
-	"portal/internal/repository"
-	"portal/internal/service"
+	"portal/internal/bmi"
+	"portal/internal/drink"
+	"portal/internal/user"
 	"portal/pkg/consul"
 	"portal/pkg/zap"
 	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	consulapi "github.com/hashicorp/consul/api"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -23,47 +25,53 @@ import (
 )
 
 func main() {
-	// Load environment variables from .env file
+
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using system environment variables")
 	}
 
-	// Initialize configuration
 	cfg := config.LoadConfig()
 
-	// Initialize logger
 	logger, err := zap.New(cfg)
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
 
 	consulConn := consul.NewConsulConn(logger, cfg)
-	consulConn.Connect()
+	consulClient := consulConn.Connect()
 	defer consulConn.Deregister()
 
-	// Connect to MongoDB
 	mongoClient, err := connectToMongoDB(cfg.MongoURI)
 	if err != nil {
 		logger.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
+
+	if err := waitPassing(consulClient, "go-main-service", 60*time.Second); err != nil {
+		logger.Fatalf("Dependency not ready: %v", err)
+	}
+
+	userService := user.NewUserService(consulClient)
+	drinkCollection := mongoClient.Database(cfg.MongoDB).Collection("drinks")
+	drinkRepository := drink.NewDrinkRepository(drinkCollection)
+	drinkService := drink.NewDrinkService(drinkRepository, userService)
+	drinkHandler := drink.NewDrinkHandler(drinkService)
+
+	bmiCollection := mongoClient.Database(cfg.MongoDB).Collection("bmi")
+	bmiRepository := bmi.NewBMIRepository(bmiCollection)
+	bmiService := bmi.NewBMIService(bmiRepository, userService)
+	bmiHandler := bmi.NewBMIHandler(bmiService)
+
+	router := gin.Default()
+
+	drink.RegisterRoutes(router, drinkHandler)
+	bmi.RegisterRoutes(router, bmiHandler)
+
 	defer func() {
 		if err := mongoClient.Disconnect(context.Background()); err != nil {
 			logger.Fatal(err)
 		}
 	}()
 
-	// Initialize repositories and service
-	portalCollection := mongoClient.Database(cfg.MongoDB).Collection("portal")
-	portalRepository := repository.NewPortalRepository(portalCollection)
-	portalService := service.NewPortalService(portalRepository)
-
-	// Set up router with Gin
-	router := gin.Default()
-
-	// Register handlers
-	api.RegisterHandlers(router, portalService)
-
-	// Initialize HTTP server
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
 		Handler: router,
@@ -109,4 +117,16 @@ func connectToMongoDB(uri string) (*mongo.Client, error) {
 
 	log.Println("Successfully connected to MongoDB")
 	return client, nil
+}
+
+func waitPassing(cli *consulapi.Client, name string, timeout time.Duration) error {
+	dl := time.Now().Add(timeout)
+	for time.Now().Before(dl) {
+		entries, _, err := cli.Health().Service(name, "", true, nil)
+		if err == nil && len(entries) > 0 {
+			return nil
+		}
+		time.Sleep(2 * time.Second)
+	}
+	return fmt.Errorf("%s not ready in consul", name)
 }

@@ -10,6 +10,7 @@ import (
 	"portal/config"
 	"portal/internal/bmi"
 	"portal/internal/drink"
+	"portal/internal/timer"
 	"portal/internal/user"
 	"portal/pkg/consul"
 	"portal/pkg/zap"
@@ -56,15 +57,21 @@ func main() {
 	drinkService := drink.NewDrinkService(drinkRepository, userService)
 	drinkHandler := drink.NewDrinkHandler(drinkService)
 
-	bmiCollection := mongoClient.Database(cfg.MongoDB).Collection("bmi")
+	bmiCollection := mongoClient.Database(cfg.MongoDB).Collection("bmis")
 	bmiRepository := bmi.NewBMIRepository(bmiCollection)
 	bmiService := bmi.NewBMIService(bmiRepository, userService)
 	bmiHandler := bmi.NewBMIHandler(bmiService)
+
+	timerCollection := mongoClient.Database(cfg.MongoDB).Collection("timers")
+	timerRepository := timer.NewTimerRepository(timerCollection)
+	timerService := timer.NewTimerService(timerRepository, userService)
+	timerHandler := timer.NewTimerHandler(timerService)
 
 	router := gin.Default()
 
 	drink.RegisterRoutes(router, drinkHandler)
 	bmi.RegisterRoutes(router, bmiHandler)
+	timer.RegisterRoutes(router, timerHandler)
 
 	defer func() {
 		if err := mongoClient.Disconnect(context.Background()); err != nil {

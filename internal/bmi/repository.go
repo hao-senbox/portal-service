@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type BMIRepo interface {
@@ -53,21 +54,31 @@ func (b *bmiRepository) GetBMIs(ctx context.Context, student_id string, date *ti
 			"$lt":  endOfDay,
 		}
 	}
-
-	var bmis []*BMI
+	
+	if date != nil {
+		var bmi BMI
+		opts := options.FindOne().SetSort(bson.D{{Key: "created_at", Value: -1}})
+		err := b.collection.FindOne(ctx, filter, opts).Decode(&bmi)
+		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				return []*BMI{}, nil
+			}
+			return nil, err
+		}
+		return []*BMI{&bmi}, nil
+	}
 
 	cursor, err := b.collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(ctx)
 
-	err = cursor.All(ctx, &bmis)
-	if err != nil {
+	var bmis []*BMI
+	if err := cursor.All(ctx, &bmis); err != nil {
 		return nil, err
 	}
-
 	return bmis, nil
-	
 }
 
 func (b *bmiRepository) GetBMI(ctx context.Context, id primitive.ObjectID) (*BMI, error) {

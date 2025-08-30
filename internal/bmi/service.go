@@ -134,6 +134,8 @@ func (s *bmiService) GetBMI(ctx context.Context, id string) (*BMIStudentResponse
 		Student:   student,
 		Date:      bmi.Date.Format("2006-01-02"),
 		BMI:       bmi.BMI,
+		Height:    bmi.Height,
+		Weight:    bmi.Weight,
 		Teacher:   teacher,
 		CreatedAt: bmi.CreatedAt,
 		UpdatedAt: bmi.UpdatedAt,

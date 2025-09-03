@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"portal/internal/user"
+	"sort"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -208,6 +209,10 @@ func (s *drinkService) GetStatistics(ctx context.Context, studentID string, date
 			Total: total,
 		})
 	}
+
+	sort.Slice(statistics, func(i, j int) bool {
+		return statistics[i].Type < statistics[j].Type
+	})
 
 	teacher, err := s.UserService.GetUserInfor(ctx, res[0].CreatedBy)
 	if err != nil {

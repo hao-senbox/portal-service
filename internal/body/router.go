@@ -9,7 +9,7 @@ import (
 func RegisterRoutes(r *gin.Engine, BodyHandler *BodyHandler) {
 	group := r.Group("/api/v1/body", middleware.Secured())
 	{
-		// group.GET("", BodyHandler.GetCheckIns)
+		group.GET("", BodyHandler.GetCheckIns)
 		// group.GET("/:id", BodyHandler.GetCheckIn)
 		group.POST("", BodyHandler.CreateCheckIn)
 		// group.PUT("/:id", BodyHandler.UpdateCheckIn)

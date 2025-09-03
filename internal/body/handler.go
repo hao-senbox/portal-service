@@ -41,12 +41,36 @@ func (h *BodyHandler) CreateCheckIn(c *gin.Context) {
 
 	ctx := context.WithValue(c, constants.TokenKey, token)
 
-	checkInID, err := h.BodyService.CreateCheckIn(ctx, &req, userID.(string))
+	err := h.BodyService.CreateCheckIn(ctx, &req, userID.(string))
 	if err != nil {
 		helper.SendError(c, 400, err, helper.ErrInvalidRequest)
 		return
 	}
 
-	helper.SendSuccess(c, 200, "Create check in successfully", checkInID)
+	helper.SendSuccess(c, 200, "Create check in successfully", nil)
+	
+}
+
+func (h *BodyHandler) GetCheckIns(c *gin.Context) {
+
+	date := c.Query("date")
+	student_id := c.Query("student")
+
+	token, exists := c.Get(constants.Token)
+	if !exists {
+		helper.SendError(c, 400, fmt.Errorf("token not found"), helper.ErrInvalidRequest)
+		return
+	}
+
+	ctx := context.WithValue(c, constants.TokenKey, token)
+
+	checkIns, err := h.BodyService.GetCheckIns(ctx, student_id, date)
+
+	if err != nil {
+		helper.SendError(c, 400, err, helper.ErrInvalidRequest)
+		return
+	}
+
+	helper.SendSuccess(c, 200, "Get check ins successfully", checkIns)
 	
 }

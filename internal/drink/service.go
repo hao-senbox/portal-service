@@ -176,16 +176,19 @@ func (s *drinkService) GetDrink(ctx context.Context, id string) (*DrinkResponse,
 
 func (s *drinkService) GetStatistics(ctx context.Context, studentID string, date string) (*DrinkDailyTotals, error) {
 
-	if date == "" {
-		return nil, fmt.Errorf("date is required (YYYY-MM-DD)")
+	var dateRepo *time.Time
+
+	if date != "" {
+		parseDate, err := time.Parse("2006-01-02", date)
+		if err != nil {
+			return nil, fmt.Errorf("invalid date format")
+		}
+		dateRepo = &parseDate
+	} else {
+		dateRepo = nil
 	}
 
-	dateParse, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		return nil, fmt.Errorf("invalid date format")
-	}
-
-	res, err := s.DrinkRepository.GetDrinks(ctx, studentID, &dateParse)
+	res, err := s.DrinkRepository.GetDrinks(ctx, studentID, dateRepo)
 	if err != nil {
 		return nil, err
 	}

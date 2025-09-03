@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"portal/config"
 	"portal/internal/bmi"
+	"portal/internal/body"
 	"portal/internal/drink"
 	"portal/internal/timer"
 	"portal/internal/user"
@@ -67,11 +68,17 @@ func main() {
 	timerService := timer.NewTimerService(timerRepository, userService)
 	timerHandler := timer.NewTimerHandler(timerService)
 
+	bodyCollection := mongoClient.Database(cfg.MongoDB).Collection("bodies")
+	bodyRepository := body.NewBodyRepository(bodyCollection)
+	bodyService := body.NewBodyService(bodyRepository, userService)
+	bodyHandler := body.NewBodyHandler(bodyService)
+
 	router := gin.Default()
 
 	drink.RegisterRoutes(router, drinkHandler)
 	bmi.RegisterRoutes(router, bmiHandler)
 	timer.RegisterRoutes(router, timerHandler)
+	body.RegisterRoutes(router, bodyHandler)
 
 	defer func() {
 		if err := mongoClient.Disconnect(context.Background()); err != nil {

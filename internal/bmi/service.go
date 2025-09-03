@@ -3,6 +3,7 @@ package bmi
 import (
 	"context"
 	"fmt"
+	"math"
 	"portal/internal/user"
 	"time"
 
@@ -97,7 +98,7 @@ func (s *bmiService) GetBMIs(ctx context.Context, student_id string, date string
 			ID:        bmi.ID,
 			Student:   student,
 			Date:      bmi.Date.Format("2006-01-02"),
-			BMI:       bmi.BMI,
+			BMI:       math.Round(bmi.BMI*100) / 100,
 			Height:    bmi.Height,
 			Weight:    bmi.Weight,
 			Teacher:   teacher,
@@ -135,7 +136,7 @@ func (s *bmiService) GetBMI(ctx context.Context, id string) (*BMIStudentResponse
 		ID:        bmi.ID,
 		Student:   student,
 		Date:      bmi.Date.Format("2006-01-02"),
-		BMI:       bmi.BMI,
+		BMI:       math.Round(bmi.BMI*100) / 100,
 		Height:    bmi.Height,
 		Weight:    bmi.Weight,
 		Teacher:   teacher,

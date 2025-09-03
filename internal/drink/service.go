@@ -220,10 +220,12 @@ func (s *drinkService) GetStatistics(ctx context.Context, studentID string, date
 	}
 
 	return &DrinkDailyTotals{
-		Teacher:  teacher,
-		Student:  student,
-		Date:     date,
+		Teacher:    teacher,
+		Student:    student,
+		Date:       date,
 		Statistics: statistics,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
 	}, nil
 
 }

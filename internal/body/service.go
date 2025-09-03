@@ -102,10 +102,11 @@ func (s *bodyService) GetCheckIns(ctx context.Context, student_id string, date s
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var result []*CheckInReponse
 
 	for _, checkIn := range checkIns {
+		
 		student, err := s.UserService.GetStudentInfor(ctx, checkIn.StudentID)
 		if err != nil {
 			return nil, err

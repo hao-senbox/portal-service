@@ -241,4 +241,5 @@ func (s *drinkService) GetStatistics(ctx context.Context, studentID string, date
 		UpdatedAt:  time.Now(),
 	}, nil
 	// test
+
 }

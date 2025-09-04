@@ -194,6 +194,14 @@ func (s *drinkService) GetStatistics(ctx context.Context, studentID string, date
 		return nil, err
 	}
 
+	if len(res) == 0 {
+		return nil, nil
+	}
+
+	if res == nil {
+		return nil, nil
+	}
+
 	totals := make(map[string]float64)
 	for _, drink := range res {
 		for _, liquid := range drink.Liquids {

@@ -61,8 +61,11 @@ func (s *drinkService) CreateDrink(ctx context.Context, req *CreateDrinkRequest,
 		}
 
 		liquid := Liquid{
-			Type:   liquid.Type,
-			Amount: liquid.Amount,
+			Type:      liquid.Type,
+			Amount:    liquid.Amount,
+			Capacity:  liquid.Capacity,
+			Initial:   liquid.Initial,
+			Remaining: liquid.Remaining,
 		}
 
 		liquids = append(liquids, liquid)
@@ -187,7 +190,7 @@ func (s *drinkService) GetStatistics(ctx context.Context, studentID string) ([]*
 		return nil, nil
 	}
 
-	dayMap := make(map[string][]*Drink) 
+	dayMap := make(map[string][]*Drink)
 	for _, drink := range res {
 		day := drink.CreatedAt.Format("2006-01-02")
 		dayMap[day] = append(dayMap[day], drink)
@@ -239,4 +242,3 @@ func (s *drinkService) GetStatistics(ctx context.Context, studentID string) ([]*
 
 	return results, nil
 }
-

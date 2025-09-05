@@ -17,6 +17,9 @@ type Drink struct {
 }
 
 type Liquid struct {
-	Type   string  `json:"type" bson:"type"`
-	Amount float64 `json:"amount" bson:"amount"`
+	Type      string  `json:"type" bson:"type"`
+	Amount    float64 `json:"amount" bson:"amount"`
+	Capacity  float64 `json:"capacity" bson:"capacity"`
+	Initial   float64 `json:"initial" bson:"initial"`
+	Remaining float64 `json:"remaining" bson:"remaining"`
 }

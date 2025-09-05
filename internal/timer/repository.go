@@ -6,6 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type TimerRepository interface {
@@ -42,9 +43,10 @@ func (t *timerRepository) GetTimers(ctx context.Context, studentID string) ([]*T
 		filter["student_id"] = studentID
 	}
 
+	findOpts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
 	var timers []*Timer
 
-	cursor, err := t.collection.Find(ctx, filter)
+	cursor, err := t.collection.Find(ctx, filter, findOpts)
 	if err != nil {
 		return nil, err
 	}

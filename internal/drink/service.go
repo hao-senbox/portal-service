@@ -14,7 +14,7 @@ type DrinkService interface {
 	CreateDrink(ctx context.Context, req *CreateDrinkRequest, userID string) (string, error)
 	GetDrinks(ctx context.Context, studentID string, date string) ([]*DrinkResponse, error)
 	GetDrink(ctx context.Context, id string) (*DrinkResponse, error)
-	GetStatistics(ctx context.Context, studentID string, date string) (*DrinkDailyTotals, error)
+	GetStatistics(ctx context.Context, studentID string) ([]*DrinkDailyTotals, error)
 }
 
 type drinkService struct {
@@ -175,69 +175,68 @@ func (s *drinkService) GetDrink(ctx context.Context, id string) (*DrinkResponse,
 
 }
 
-func (s *drinkService) GetStatistics(ctx context.Context, studentID string, date string) (*DrinkDailyTotals, error) {
+func (s *drinkService) GetStatistics(ctx context.Context, studentID string) ([]*DrinkDailyTotals, error) {
 
 	var dateRepo *time.Time
-
-	if date != "" {
-		parseDate, err := time.Parse("2006-01-02", date)
-		if err != nil {
-			return nil, fmt.Errorf("invalid date format")
-		}
-		dateRepo = &parseDate
-	} else {
-		dateRepo = nil
-	}
 
 	res, err := s.DrinkRepository.GetDrinks(ctx, studentID, dateRepo)
 	if err != nil {
 		return nil, err
 	}
-
 	if len(res) == 0 {
 		return nil, nil
 	}
 
-	if res == nil {
-		return nil, nil
-	}
-
-	totals := make(map[string]float64)
+	dayMap := make(map[string][]*Drink) 
 	for _, drink := range res {
-		for _, liquid := range drink.Liquids {
-			totals[liquid.Type] += liquid.Amount
-		}
+		day := drink.CreatedAt.Format("2006-01-02")
+		dayMap[day] = append(dayMap[day], drink)
 	}
 
-	var statistics []Satistic
+	var results []*DrinkDailyTotals
 
-	for liquidType, total := range totals {
-		statistics = append(statistics, Satistic{
-			Type:  liquidType,
-			Total: total,
+	for day, drinks := range dayMap {
+		totals := make(map[string]float64)
+		for _, drink := range drinks {
+			for _, liquid := range drink.Liquids {
+				totals[liquid.Type] += liquid.Amount
+			}
+		}
+
+		var statistics []Satistic
+		for liquidType, total := range totals {
+			statistics = append(statistics, Satistic{
+				Type:  liquidType,
+				Total: total,
+			})
+		}
+		sort.Slice(statistics, func(i, j int) bool {
+			return statistics[i].Type < statistics[j].Type
+		})
+
+		teacher, err := s.UserService.GetUserInfor(ctx, drinks[0].CreatedBy)
+		if err != nil {
+			return nil, err
+		}
+		student, err := s.UserService.GetStudentInfor(ctx, drinks[0].StudentID)
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, &DrinkDailyTotals{
+			Teacher:    teacher,
+			Student:    student,
+			Date:       day,
+			Statistics: statistics,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
 		})
 	}
 
-	sort.Slice(statistics, func(i, j int) bool {
-		return statistics[i].Type < statistics[j].Type
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Date < results[j].Date
 	})
 
-	teacher, err := s.UserService.GetUserInfor(ctx, res[0].CreatedBy)
-	if err != nil {
-		return nil, err
-	}
-
-	student, err := s.UserService.GetStudentInfor(ctx, res[0].StudentID)
-	if err != nil {
-		return nil, err
-	}
-
-	return &DrinkDailyTotals{
-		Teacher:    teacher,
-		Student:    student,
-		Date:       date,
-		Statistics: statistics,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-	}, nil
+	return results, nil
 }
+

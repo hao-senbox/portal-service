@@ -33,17 +33,19 @@ func (s *timerService) CreateTimer(ctx context.Context, req *CreateTimerRequest,
 	}
 
 	timer := &Timer{
-		ID:            primitive.NewObjectID(),
-		StudentID:     req.StudentID,
-		StartColor:    req.StartColor,
-		EndColor:      req.EndColor,
-		Duration:      req.Duration,
-		NumberOfSound: req.NumberOfSound,
-		Image:         req.Image,
-		TypePlay:      req.TypePlay,
-		CreatedBy:     userID,
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
+		ID:              primitive.NewObjectID(),
+		StudentID:       req.StudentID,
+		StartColor:      req.StartColor,
+		EndColor:        req.EndColor,
+		Duration:        req.Duration,
+		NumberOfSound:   req.NumberOfSound,
+		CenterLine:      req.LineCenter,
+		OpacityDuration: req.OpacityDuration,
+		Image:           req.Image,
+		TypePlay:        req.TypePlay,
+		CreatedBy:       userID,
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
 	}
 
 	id, err := s.TimerRepository.CreateTimer(ctx, timer)
@@ -82,17 +84,19 @@ func (s *timerService) GetTimers(ctx context.Context, studentID string) ([]*Time
 		}
 
 		result = append(result, &TimerResponse{
-			ID:            timer.ID,
-			Student:       student,
-			StartColor:    timer.StartColor,
-			EndColor:      timer.EndColor,
-			Duration:      timer.Duration,
-			NumberOfSound: timer.NumberOfSound,
-			Image:         timer.Image,
-			TypePlay:      timer.TypePlay,
-			Teacher:       teacher,
-			CreatedAt:     timer.CreatedAt,
-			UpdatedAt:     timer.UpdatedAt,
+			ID:              timer.ID,
+			Student:         student,
+			StartColor:      timer.StartColor,
+			EndColor:        timer.EndColor,
+			Duration:        timer.Duration,
+			NumberOfSound:   timer.NumberOfSound,
+			CenterLine:      timer.CenterLine,
+			OpacityDuration: timer.OpacityDuration,
+			Image:           timer.Image,
+			TypePlay:        timer.TypePlay,
+			Teacher:         teacher,
+			CreatedAt:       timer.CreatedAt,
+			UpdatedAt:       timer.UpdatedAt,
 		})
 	}
 

@@ -101,7 +101,6 @@ func (h *DrinkHandler) GetDrink(c *gin.Context) {
 func (h *DrinkHandler) GetStatistics(c *gin.Context) {
 
 	student_id := c.Query("student")
-	date := c.Query("date")
 
 	token, exists := c.Get(constants.Token)
 	if !exists {
@@ -111,7 +110,7 @@ func (h *DrinkHandler) GetStatistics(c *gin.Context) {
 
 	ctx := context.WithValue(c, constants.TokenKey, token)
 
-	statistics, err := h.DrinkService.GetStatistics(ctx, student_id, date)
+	statistics, err := h.DrinkService.GetStatistics(ctx, student_id)
 
 	if err != nil {
 		helper.SendError(c, 400, err, helper.ErrInvalidRequest)

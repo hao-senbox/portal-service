@@ -2,12 +2,12 @@ package drink
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DrinkRepository interface {
@@ -54,11 +54,10 @@ func (d *drinkRepository) GetDrinks(ctx context.Context, studentID string, date 
 			"$lt":  endOfDay,
 		}
 	}
-
-	fmt.Printf("filter: %v\n", filter)
+	findOpts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
 	var drinks []*Drink
 
-	cursor, err := d.collection.Find(ctx, filter)
+	cursor, err := d.collection.Find(ctx, filter, findOpts)
 	if err != nil {
 		return nil, err
 	}

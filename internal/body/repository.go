@@ -38,6 +38,7 @@ func (r *bodyRepository) PushCheckIn(ctx context.Context, checkIn *CheckIn) erro
 	now := time.Now()
 
 	for _, mark := range checkIn.Marks {
+
 		markData := bson.M{
 			"name":         mark.Name,
 			"note":         mark.Note,
@@ -64,7 +65,7 @@ func (r *bodyRepository) PushCheckIn(ctx context.Context, checkIn *CheckIn) erro
 
 		result, err := r.collection.UpdateOne(ctx, filterWithMark, updateExisting)
 		if err != nil {
-			return fmt.Errorf("lỗi khi cập nhật mark: %v", err)
+			return fmt.Errorf("error when update mark: %v", err)
 		}
 
 		if result.MatchedCount == 0 {

@@ -2,6 +2,7 @@ package body
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,25 +35,77 @@ func (r *bodyRepository) PushCheckIn(ctx context.Context, checkIn *CheckIn) erro
 		"gender":     checkIn.Gender,
 	}
 
-	update := bson.M{
-		"$setOnInsert": bson.M{
-			"created_by": checkIn.CreatedBy,
-			"created_at": time.Now(),
-		},
-		"$push": bson.M{
-			"marks": bson.M{
-				"$each": checkIn.Marks,
+	now := time.Now()
+
+	for _, mark := range checkIn.Marks {
+		markData := bson.M{
+			"name":         mark.Name,
+			"note":         mark.Note,
+			"color":        mark.Color,
+			"severity":     mark.Severity,
+			"submitted_at": now,
+		}
+
+		filterWithMark := bson.M{
+			"student_id": checkIn.StudentID,
+			"type":       checkIn.Type,
+			"date":       checkIn.Date,
+			"context":    checkIn.Context,
+			"gender":     checkIn.Gender,
+			"marks.name": mark.Name, 
+		}
+
+		updateExisting := bson.M{
+			"$set": bson.M{
+				"marks.$":    markData, 
+				"updated_at": now,
 			},
-		},
-		"$set": bson.M{
-			"updated_at": time.Now(),
-		},
+		}
+
+		result, err := r.collection.UpdateOne(ctx, filterWithMark, updateExisting)
+		if err != nil {
+			return fmt.Errorf("lỗi khi cập nhật mark: %v", err)
+		}
+
+		if result.MatchedCount == 0 {
+			ensureDoc := bson.M{
+				"$setOnInsert": bson.M{
+					"student_id": checkIn.StudentID,
+					"type":       checkIn.Type,
+					"date":       checkIn.Date,
+					"context":    checkIn.Context,
+					"gender":     checkIn.Gender,
+					"created_by": checkIn.CreatedBy,
+					"created_at": now,
+					"marks":      []interface{}{}, 
+				},
+				"$set": bson.M{
+					"updated_at": now,
+				},
+			}
+
+			_, err = r.collection.UpdateOne(ctx, filter, ensureDoc, options.Update().SetUpsert(true))
+			if err != nil {
+				return fmt.Errorf("error when ensure doc: %v", err)
+			}
+
+			addMark := bson.M{
+				"$push": bson.M{
+					"marks": markData,
+				},
+				"$set": bson.M{
+					"updated_at": now,
+				},
+			}
+
+			_, err = r.collection.UpdateOne(ctx, filter, addMark)
+			if err != nil {
+				return fmt.Errorf("error when add mark: %v", err)
+			}
+		}
 	}
 
-	opts := options.Update().SetUpsert(true)
-	_, err := r.collection.UpdateOne(ctx, filter, update, opts)
-	return err
-
+	return nil
 }
 
 func (r *bodyRepository) GetCheckIns(ctx context.Context, student_id string, date *time.Time) ([]*CheckIn, error) {

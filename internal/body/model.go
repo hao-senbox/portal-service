@@ -22,6 +22,7 @@ type CheckIn struct {
 type Mark struct {
 	Name        string    `json:"name" bson:"name"`
 	Note        *string   `json:"note" bson:"note"`
+	Color       string    `json:"color" bson:"color"`
 	Severity    int       `json:"severity" bson:"severity"`
 	SubmittedAt time.Time `json:"submitted_at" bson:"submitted_at"`
 }

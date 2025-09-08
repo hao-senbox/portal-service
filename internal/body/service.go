@@ -59,6 +59,9 @@ func (s *bodyService) CreateCheckIn(ctx context.Context, req *CreateCheckInReque
 
 	now := time.Now()
 	for i := range req.Marks {
+		if req.Marks[i].Color == "" {
+			return fmt.Errorf("color is required")
+		}
 		req.Marks[i].SubmittedAt = now
 	}
 

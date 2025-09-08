@@ -41,9 +41,9 @@ func (s *bodyService) CreateCheckIn(ctx context.Context, req *CreateCheckInReque
 		return fmt.Errorf("invalid date format")
 	}
 
-	if req.Context == "" {
-		return fmt.Errorf("context is required")
-	}
+	// if req.Context == "" {
+	// 	return fmt.Errorf("context is required")
+	// }
 
 	if req.Type == "" {
 		return fmt.Errorf("type is required")

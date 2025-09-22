@@ -11,6 +11,7 @@ import (
 	"portal/internal/bmi"
 	"portal/internal/body"
 	"portal/internal/drink"
+	"portal/internal/portal"
 	"portal/internal/timer"
 	"portal/internal/user"
 	"portal/pkg/consul"
@@ -73,13 +74,18 @@ func main() {
 	bodyService := body.NewBodyService(bodyRepository, userService)
 	bodyHandler := body.NewBodyHandler(bodyService)
 
+	portalCollection := mongoClient.Database(cfg.MongoDB).Collection("portals")
+	portalRepository := portal.NewPortalRepository(portalCollection)
+	portalService := portal.NewPortalService(portalRepository)
+	portalHandler := portal.NewPortalHandlers(portalService)
+
 	router := gin.Default()
 
 	drink.RegisterRoutes(router, drinkHandler)
 	bmi.RegisterRoutes(router, bmiHandler)
 	timer.RegisterRoutes(router, timerHandler)
 	body.RegisterRoutes(router, bodyHandler)
-
+	portal.RegisterRoutes(router, portalHandler)
 	defer func() {
 		if err := mongoClient.Disconnect(context.Background()); err != nil {
 			logger.Fatal(err)

@@ -19,6 +19,7 @@ func NewPortalHandlers(portalService service.PortalService) *PortalHandlers {
 }
 func RegisterHandlers(router *gin.Engine, portalService service.PortalService) {
 
+	// h
 	handlers := NewPortalHandlers(portalService)
 
 	portalGroup := router.Group("/api/v1/portal")

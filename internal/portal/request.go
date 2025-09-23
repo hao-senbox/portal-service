@@ -1,8 +1,8 @@
-package models
+package portal
 
 type RequestStudentActivity struct {
 	StudentID    string                `json:"student_id" validate:"required"`
-	Date         string                `json:"date" validate:"required"` 
+	Date         string                `json:"date" validate:"required"`
 	TypeActivity string                `json:"type_activity" validate:"required"`
 	Data         []StudentActivityData `json:"data" validate:"required"`
 	AssignedBy   string                `json:"assigned_by" validate:"required"`

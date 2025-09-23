@@ -1,8 +1,7 @@
-package repository
+package portal
 
 import (
 	"context"
-	"portal/internal/models"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -10,8 +9,8 @@ import (
 )
 
 type PortalRepository interface {
-	CreateStudentActivity(ctx context.Context, activityStudent *models.StudentActivity) error	
-	GetAllStudentActivity(ctx context.Context, studentID string, date *time.Time) ([]*models.StudentActivity, error)
+	CreateStudentActivity(ctx context.Context, activityStudent *StudentActivity) error
+	GetAllStudentActivity(ctx context.Context, studentID string, date *time.Time) ([]*StudentActivity, error)
 }
 
 type portalRepository struct {
@@ -19,12 +18,12 @@ type portalRepository struct {
 }
 
 func NewPortalRepository(collection *mongo.Collection) PortalRepository {
-	return &portalRepository {
+	return &portalRepository{
 		collection: collection,
 	}
 }
 
-func (r *portalRepository) CreateStudentActivity(ctx context.Context, activityStudent *models.StudentActivity) error {
+func (r *portalRepository) CreateStudentActivity(ctx context.Context, activityStudent *StudentActivity) error {
 
 	_, err := r.collection.InsertOne(ctx, activityStudent)
 	if err != nil {
@@ -34,16 +33,16 @@ func (r *portalRepository) CreateStudentActivity(ctx context.Context, activitySt
 	return nil
 }
 
-func (r *portalRepository) GetAllStudentActivity(ctx context.Context, studentID string, date *time.Time) ([]*models.StudentActivity, error) {
+func (r *portalRepository) GetAllStudentActivity(ctx context.Context, studentID string, date *time.Time) ([]*StudentActivity, error) {
 
-	var activities []*models.StudentActivity
+	var activities []*StudentActivity
 
 	filter := bson.M{"student_id": studentID}
 
 	if date != nil {
 		filter["date"] = date
 	}
-	
+
 	cursor, err := r.collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err

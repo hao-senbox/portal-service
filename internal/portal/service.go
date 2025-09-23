@@ -1,4 +1,4 @@
-package service
+package portal
 
 import (
 	"context"
@@ -9,27 +9,24 @@ import (
 	"strings"
 	"time"
 
-	"portal/internal/models"
-	"portal/internal/repository"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type PortalService interface {
-	CreateStudentActivity(ctx context.Context, req *models.RequestStudentActivity) error
-	GetAllStudentActivity(ctx context.Context, studentID string, date string) ([]*models.StudentDailyActivities, error)
+	CreateStudentActivity(ctx context.Context, req *RequestStudentActivity) error
+	GetAllStudentActivity(ctx context.Context, studentID string, date string) ([]*StudentDailyActivities, error)
 }
 type portalService struct {
-	repoPortal repository.PortalRepository
+	repoPortal PortalRepository
 }
 
-func NewPortalService(repo repository.PortalRepository) PortalService {
+func NewPortalService(repo PortalRepository) PortalService {
 	return &portalService{
 		repoPortal: repo,
 	}
 }
 
-func (s *portalService) CreateStudentActivity(ctx context.Context, req *models.RequestStudentActivity) error {
+func (s *portalService) CreateStudentActivity(ctx context.Context, req *RequestStudentActivity) error {
 
 	if req.StudentID == "" {
 		return fmt.Errorf("student ID cannot be empty")
@@ -56,9 +53,7 @@ func (s *portalService) CreateStudentActivity(ctx context.Context, req *models.R
 		return fmt.Errorf("assigned by cannot be empty")
 	}
 
-	fmt.Printf("data : %v\n", req.Data)
-
-	studentActivity := &models.StudentActivity{
+	studentActivity := &StudentActivity{
 		ID:           primitive.NewObjectID(),
 		StudentID:    req.StudentID,
 		TypeActivity: req.TypeActivity,
@@ -78,7 +73,7 @@ func (s *portalService) CreateStudentActivity(ctx context.Context, req *models.R
 	return nil
 }
 
-func (s *portalService) GetAllStudentActivity(ctx context.Context, studentID string, date string) ([]*models.StudentDailyActivities, error) {
+func (s *portalService) GetAllStudentActivity(ctx context.Context, studentID string, date string) ([]*StudentDailyActivities, error) {
 
 	var parsedDate *time.Time
 
@@ -100,26 +95,26 @@ func (s *portalService) GetAllStudentActivity(ctx context.Context, studentID str
 	return transformData, nil
 }
 
-func (s *portalService) transformStudentActivities(rawActivities []*models.StudentActivity) []*models.StudentDailyActivities {
+func (s *portalService) transformStudentActivities(rawActivities []*StudentActivity) []*StudentDailyActivities {
 
-	groupedData := make(map[string]map[string][]*models.StudentActivity)
+	groupedData := make(map[string]map[string][]*StudentActivity)
 
 	for _, activity := range rawActivities {
 		studentID := activity.StudentID
 		date := activity.Date.Format("2006-01-02")
 
 		if groupedData[studentID] == nil {
-			groupedData[studentID] = make(map[string][]*models.StudentActivity)
+			groupedData[studentID] = make(map[string][]*StudentActivity)
 		}
 
 		groupedData[studentID][date] = append(groupedData[studentID][date], activity)
 	}
 
-	var result []*models.StudentDailyActivities
+	var result []*StudentDailyActivities
 
 	for studentID, dateMap := range groupedData {
 		for date, activities := range dateMap {
-			dailyActivity := &models.StudentDailyActivities{
+			dailyActivity := &StudentDailyActivities{
 				StudentID:  studentID,
 				Date:       date,
 				Activities: s.groupActivitiesByType(activities),
@@ -131,20 +126,20 @@ func (s *portalService) transformStudentActivities(rawActivities []*models.Stude
 	return result
 }
 
-func (s *portalService) groupActivitiesByType(activities []*models.StudentActivity) []models.ActivitySummary {
+func (s *portalService) groupActivitiesByType(activities []*StudentActivity) []ActivitySummary {
 
-	typeGroups := make(map[string][]*models.StudentActivity)
+	typeGroups := make(map[string][]*StudentActivity)
 
 	for _, activity := range activities {
 		typeGroups[activity.TypeActivity] = append(typeGroups[activity.TypeActivity], activity)
 	}
 
-	var result []models.ActivitySummary
+	var result []ActivitySummary
 
 	for typeActivity, typeActivities := range typeGroups {
-		var details []models.ActivityDetail
+		var details []ActivityDetail
 		for _, activity := range typeActivities {
-			details = append(details, models.ActivityDetail{
+			details = append(details, ActivityDetail{
 				SessionID:    activity.ID.Hex(),
 				TypeActivity: activity.TypeActivity,
 				Data:         activity.Data,
@@ -155,9 +150,9 @@ func (s *portalService) groupActivitiesByType(activities []*models.StudentActivi
 			})
 		}
 
-		summary := models.ActivitySummary{
+		summary := ActivitySummary{
 			TypeActivity: typeActivity,
-			Summary: models.ActivitySummaryData{
+			Summary: ActivitySummaryData{
 				TotalSessions: len(details),
 				Statistics:    s.generateStatistics(typeActivity, details),
 			},
@@ -171,7 +166,7 @@ func (s *portalService) groupActivitiesByType(activities []*models.StudentActivi
 
 }
 
-func (s *portalService) generateStatistics(typeActivity string, details []models.ActivityDetail) map[string]interface{} {
+func (s *portalService) generateStatistics(typeActivity string, details []ActivityDetail) map[string]interface{} {
 	switch typeActivity {
 	case "sleep_rest":
 		return s.generateSleepRestStatistics(details)
@@ -192,7 +187,7 @@ func (s *portalService) generateStatistics(typeActivity string, details []models
 	}
 }
 
-func (s *portalService) generateFoodStatistics(details []models.ActivityDetail) map[string]interface{} {
+func (s *portalService) generateFoodStatistics(details []ActivityDetail) map[string]interface{} {
 
 	dishConsumption := make(map[string][]float64)
 
@@ -216,7 +211,7 @@ func (s *portalService) generateFoodStatistics(details []models.ActivityDetail) 
 			}
 		}
 	}
-	
+
 	var summary []map[string]interface{}
 
 	for dishName, consumption := range dishConsumption {
@@ -225,7 +220,7 @@ func (s *portalService) generateFoodStatistics(details []models.ActivityDetail) 
 			for _, c := range consumption {
 				sum += c
 			}
-			average := sum / float64(len(consumption))	
+			average := sum / float64(len(consumption))
 			summary = append(summary, map[string]interface{}{
 				"dish_name": dishName,
 				"total":     math.Round(average*100) / 100,
@@ -239,7 +234,7 @@ func (s *portalService) generateFoodStatistics(details []models.ActivityDetail) 
 
 }
 
-func (s *portalService) generateExerciseStatistics(details []models.ActivityDetail) map[string]interface{} {
+func (s *portalService) generateExerciseStatistics(details []ActivityDetail) map[string]interface{} {
 
 	var total int
 	for _, detail := range details {
@@ -258,15 +253,15 @@ func (s *portalService) generateExerciseStatistics(details []models.ActivityDeta
 
 }
 
-func (s *portalService) generateSocialPlayStatistics(details []models.ActivityDetail) map[string]interface{} {
+func (s *portalService) generateSocialPlayStatistics(details []ActivityDetail) map[string]interface{} {
 	return nil
 }
 
-func (s *portalService) generateWorkStatistics(details []models.ActivityDetail) map[string]interface{} {
+func (s *portalService) generateWorkStatistics(details []ActivityDetail) map[string]interface{} {
 	return nil
 }
 
-func (s *portalService) generateFluidsStatistics(details []models.ActivityDetail) map[string]interface{} {
+func (s *portalService) generateFluidsStatistics(details []ActivityDetail) map[string]interface{} {
 
 	var totalWater int
 	var totalJuice int
@@ -297,7 +292,7 @@ func (s *portalService) generateFluidsStatistics(details []models.ActivityDetail
 			case "other_fluid":
 				if value, ok := s.parseFluidsValue(d.Value); ok {
 					totalOther += value
-				} 
+				}
 			}
 		}
 	}
@@ -309,10 +304,10 @@ func (s *portalService) generateFluidsStatistics(details []models.ActivityDetail
 		"milk":      fmt.Sprintf("%dml", totalMilk),
 		"other":     fmt.Sprintf("%dml", totalOther),
 	}
-	
+
 }
 
-func (s *portalService) generateToiletingStatistics(details []models.ActivityDetail) map[string]interface{} {
+func (s *portalService) generateToiletingStatistics(details []ActivityDetail) map[string]interface{} {
 
 	var number1 int
 	var number2 int
@@ -382,7 +377,7 @@ func (s *portalService) generateToiletingStatistics(details []models.ActivityDet
 	}
 }
 
-func (s *portalService) generateSleepRestStatistics(details []models.ActivityDetail) map[string]interface{} {
+func (s *portalService) generateSleepRestStatistics(details []ActivityDetail) map[string]interface{} {
 
 	var totalSleep int
 	var totalRest int
@@ -434,13 +429,13 @@ func (s *portalService) parseSecondToHoursAndMinutes(seconds int) string {
 func (s *portalService) parseFluidsValue(input string) (int, bool) {
 	type FluidDetails struct {
 		Capacity     int `json:"capacity"`      // Dung tích nước
-		ActualPoured int `json:"actual_poured"` // Dung tích nước rót thực tế  
+		ActualPoured int `json:"actual_poured"` // Dung tích nước rót thực tế
 		Consumed     int `json:"consumed"`      // Học sinh uống bao nhiêu
 		Remaining    int `json:"remaining"`     // Còn lại bao nhiêu
 	}
 
 	if strings.Contains(input, "{") {
-		
+
 		var fluidDetails FluidDetails
 		err := json.Unmarshal([]byte(input), &fluidDetails)
 		if err != nil {

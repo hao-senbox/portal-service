@@ -1,14 +1,6 @@
-package models
+package portal
 
 import "time"
-
-type APIResponse struct {
-	StatusCode int         `json:"status_code"`
-	Message    string      `json:"message,omitempty"`
-	Data       interface{} `json:"data,omitempty"`
-	Error      string      `json:"error,omitempty"`
-	ErrorCode  string      `json:"error_code,omitempty"`
-}
 
 type StudentDailyActivities struct {
 	StudentID  string            `bson:"student_id, omitempty" json:"student_id"`
@@ -37,7 +29,3 @@ type ActivityDetail struct {
 	UpdatedAt    time.Time             `json:"updated_at"`
 }
 
-const (
-	ErrInvalidOperation = "ERR_INVALID_OPERATION"
-	ErrInvalidRequest   = "ERR_INVALID_REQUEST"
-)

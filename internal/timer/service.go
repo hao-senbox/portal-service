@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"portal/internal/user"
+	"portal/pkg/uploader"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,12 +18,14 @@ type TimerService interface {
 type timerService struct {
 	TimerRepository TimerRepository
 	UserService     user.UserService
+	ImageService    uploader.ImageService
 }
 
-func NewTimerService(TimerRepository TimerRepository, userService user.UserService) TimerService {
+func NewTimerService(TimerRepository TimerRepository, userService user.UserService, imageService uploader.ImageService) TimerService {
 	return &timerService{
 		TimerRepository: TimerRepository,
 		UserService:     userService,
+		ImageService:    imageService,
 	}
 }
 
@@ -33,19 +36,24 @@ func (s *timerService) CreateTimer(ctx context.Context, req *CreateTimerRequest,
 	}
 
 	timer := &Timer{
-		ID:              primitive.NewObjectID(),
-		StudentID:       req.StudentID,
-		StartColor:      req.StartColor,
-		EndColor:        req.EndColor,
-		Duration:        req.Duration,
-		NumberOfSound:   req.NumberOfSound,
-		CenterLine:      req.LineCenter,
-		OpacityDuration: req.OpacityDuration,
-		Image:           req.Image,
-		TypePlay:        req.TypePlay,
-		CreatedBy:       userID,
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now(),
+		ID:                primitive.NewObjectID(),
+		StudentID:         req.StudentID,
+		StartColor:        req.StartColor,
+		EndColor:          req.EndColor,
+		Duration:          req.Duration,
+		NumberOfSound:     req.NumberOfSound,
+		CenterLine:        req.LineCenter,
+		OpacityDuration:   req.OpacityDuration,
+		ImageStartKey:     req.ImageStartKey,
+		ShowImageStart:    req.ShowImageStart,
+		CaptionImageStart: req.CaptionImageStart,
+		ImageEndKey:       req.ImageEndKey,
+		ShowImageEnd:      req.ShowImageEnd,
+		CaptionImageEnd:   req.CaptionImageEnd,
+		TypePlay:          req.TypePlay,
+		CreatedBy:         userID,
+		CreatedAt:         time.Now(),
+		UpdatedAt:         time.Now(),
 	}
 
 	id, err := s.TimerRepository.CreateTimer(ctx, timer)
@@ -83,20 +91,41 @@ func (s *timerService) GetTimers(ctx context.Context, studentID string) ([]*Time
 			return nil, err
 		}
 
+		if timer.ImageStartKey != "" {
+			imageUrlStart, err := s.ImageService.GetImageKey(ctx, timer.ImageStartKey)
+			if err != nil {
+				return nil, err
+			}
+			timer.ImageStartKey = imageUrlStart.Url
+		}
+
+		if timer.ImageEndKey != "" {
+			imageUrlEnd, err := s.ImageService.GetImageKey(ctx, timer.ImageEndKey)
+			if err != nil {
+				return nil, err
+			}
+			timer.ImageEndKey = imageUrlEnd.Url
+		}
+
 		result = append(result, &TimerResponse{
-			ID:              timer.ID,
-			Student:         student,
-			StartColor:      timer.StartColor,
-			EndColor:        timer.EndColor,
-			Duration:        timer.Duration,
-			NumberOfSound:   timer.NumberOfSound,
-			CenterLine:      timer.CenterLine,
-			OpacityDuration: timer.OpacityDuration,
-			Image:           timer.Image,
-			TypePlay:        timer.TypePlay,
-			Teacher:         teacher,
-			CreatedAt:       timer.CreatedAt,
-			UpdatedAt:       timer.UpdatedAt,
+			ID:                timer.ID,
+			Student:           student,
+			StartColor:        timer.StartColor,
+			EndColor:          timer.EndColor,
+			Duration:          timer.Duration,
+			NumberOfSound:     timer.NumberOfSound,
+			CenterLine:        timer.CenterLine,
+			OpacityDuration:   timer.OpacityDuration,
+			ImageStartKey:     timer.ImageStartKey,
+			ShowImageStart:    timer.ShowImageStart,
+			CaptionImageStart: timer.CaptionImageStart,
+			ImageEndKey:       timer.ImageEndKey,
+			ShowImageEnd:      timer.ShowImageEnd,
+			CaptionImageEnd:   timer.CaptionImageEnd,
+			TypePlay:          timer.TypePlay,
+			Teacher:           teacher,
+			CreatedAt:         timer.CreatedAt,
+			UpdatedAt:         timer.UpdatedAt,
 		})
 	}
 

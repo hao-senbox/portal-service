@@ -15,6 +15,7 @@ import (
 	"portal/internal/timer"
 	"portal/internal/user"
 	"portal/pkg/consul"
+	"portal/pkg/uploader"
 	"portal/pkg/zap"
 	"syscall"
 	"time"
@@ -54,6 +55,8 @@ func main() {
 	}
 
 	userService := user.NewUserService(consulClient)
+	imageService := uploader.NewImageService(consulClient)
+
 	drinkCollection := mongoClient.Database(cfg.MongoDB).Collection("drinks")
 	drinkRepository := drink.NewDrinkRepository(drinkCollection)
 	drinkService := drink.NewDrinkService(drinkRepository, userService)
@@ -66,7 +69,7 @@ func main() {
 
 	timerCollection := mongoClient.Database(cfg.MongoDB).Collection("timers")
 	timerRepository := timer.NewTimerRepository(timerCollection)
-	timerService := timer.NewTimerService(timerRepository, userService)
+	timerService := timer.NewTimerService(timerRepository, userService, imageService)
 	timerHandler := timer.NewTimerHandler(timerService)
 
 	bodyCollection := mongoClient.Database(cfg.MongoDB).Collection("bodies")

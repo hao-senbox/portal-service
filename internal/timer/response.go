@@ -27,3 +27,16 @@ type TimerResponse struct {
 	CreatedAt         time.Time          `json:"created_at" bson:"created_at"`
 	UpdatedAt         time.Time          `json:"updated_at" bson:"updated_at"`
 }
+
+type IsTimeResponse struct {
+	ID           primitive.ObjectID `json:"id" bson:"_id"`
+	Student      *user.UserInfor    `json:"student" bson:"student"`
+	Sentence     string             `json:"sentence" bson:"sentence"`
+	Mode         string             `json:"mode" bson:"mode"`
+	ImageUrl     string             `json:"image_url" bson:"image_url"`
+	CaptionImage string             `json:"caption_image" bson:"caption_image"`
+	ImageSize    string             `json:"image_size" bson:"image_size"`
+	Teacher      *user.UserInfor    `json:"teacher" bson:"teacher"`
+	CreatedAt    time.Time          `json:"created_at" bson:"created_at"`
+	UpdatedAt    time.Time          `json:"updated_at" bson:"updated_at"`
+}

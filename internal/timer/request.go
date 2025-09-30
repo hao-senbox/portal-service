@@ -16,3 +16,13 @@ type CreateTimerRequest struct {
 	CaptionImageEnd   string  `json:"caption_image_end" bson:"caption_image_end"`
 	TypePlay          string  `json:"type_play" bson:"type_play"`
 }
+
+type CreateIsTimeRequest struct {
+	StudentID    string `json:"student_id" bson:"student_id"`
+	Sentence     string `json:"sentence" bson:"sentence"`
+	Mode         string `json:"mode" bson:"mode"`
+	ImageKey     string `json:"image_key" bson:"image_key"`
+	CaptionImage string `json:"caption_image" bson:"caption_image"`
+	ImageSize    string `json:"image_size" bson:"image_size"`
+	CreatedBy    string `json:"created_by" bson:"created_by"`
+}

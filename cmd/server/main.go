@@ -68,7 +68,8 @@ func main() {
 	bmiHandler := bmi.NewBMIHandler(bmiService)
 
 	timerCollection := mongoClient.Database(cfg.MongoDB).Collection("timers")
-	timerRepository := timer.NewTimerRepository(timerCollection)
+	isTimeCollection := mongoClient.Database(cfg.MongoDB).Collection("is_times")
+	timerRepository := timer.NewTimerRepository(timerCollection, isTimeCollection)
 	timerService := timer.NewTimerService(timerRepository, userService, imageService)
 	timerHandler := timer.NewTimerHandler(timerService)
 

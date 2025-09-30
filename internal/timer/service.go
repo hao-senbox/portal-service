@@ -13,6 +13,8 @@ import (
 type TimerService interface {
 	CreateTimer(ctx context.Context, req *CreateTimerRequest, userID string) (string, error)
 	GetTimers(ctx context.Context, studentID string) ([]*TimerResponse, error)
+	CreateIsTime(ctx context.Context, req *CreateIsTimeRequest, userID string) error
+	GetIsTimes(ctx context.Context, studentID string) ([]*IsTimeResponse, error)
 }
 
 type timerService struct {
@@ -130,4 +132,82 @@ func (s *timerService) GetTimers(ctx context.Context, studentID string) ([]*Time
 	}
 
 	return result, nil
+}
+
+func (s *timerService) CreateIsTime(ctx context.Context, req *CreateIsTimeRequest, userID string) error {
+
+	if req.StudentID == "" {
+		return fmt.Errorf("student_id is required")
+	}
+
+	if userID == "" {
+		return fmt.Errorf("created_by is required")
+	}
+
+	data := &IsTime{
+		ID:           primitive.NewObjectID(),
+		StudentID:    req.StudentID,
+		Sentence:     req.Sentence,
+		Mode:         req.Mode,
+		ImageKey:     req.ImageKey,
+		CaptionImage: req.CaptionImage,
+		ImageSize:    req.ImageSize,
+		CreatedBy:    userID,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+
+	return s.TimerRepository.CreateIsTime(ctx, data)
+}
+
+func (s *timerService) GetIsTimes(ctx context.Context, studentID string) ([]*IsTimeResponse, error) {
+
+	if studentID == "" {
+		studentID = ""
+	}
+
+	isTimes, err := s.TimerRepository.GetIsTimes(ctx, studentID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*IsTimeResponse
+
+	for _, isTime := range isTimes {
+		if isTime.ImageKey != "" {
+			imageUrl, err := s.ImageService.GetImageKey(ctx, isTime.ImageKey)
+			if err != nil {
+				return nil, err
+			}
+			isTime.ImageKey = imageUrl.Url
+		}
+
+		student, err := s.UserService.GetStudentInfor(ctx, isTime.StudentID)
+		if err != nil {
+			return nil, err
+		}
+
+		teacher, err := s.UserService.GetUserInfor(ctx, isTime.CreatedBy)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, &IsTimeResponse{
+			ID:           isTime.ID,
+			Student:      student,
+			Sentence:     isTime.Sentence,
+			Mode:         isTime.Mode,
+			ImageUrl:     isTime.ImageKey,
+			CaptionImage: isTime.CaptionImage,
+			ImageSize:    isTime.ImageSize,
+			Teacher:      teacher,
+			CreatedAt:    isTime.CreatedAt,
+			UpdatedAt:    isTime.UpdatedAt,
+		})
+
+	}
+
+	return result, nil
+
 }

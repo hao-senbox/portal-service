@@ -147,6 +147,7 @@ func (s *timerService) CreateIsTime(ctx context.Context, req *CreateIsTimeReques
 	data := &IsTime{
 		ID:           primitive.NewObjectID(),
 		StudentID:    req.StudentID,
+		IndexImage:   req.IndexImage,
 		Sentence:     req.Sentence,
 		Mode:         req.Mode,
 		ImageKey:     req.ImageKey,
@@ -196,6 +197,7 @@ func (s *timerService) GetIsTimes(ctx context.Context, studentID string) ([]*IsT
 		result = append(result, &IsTimeResponse{
 			ID:           isTime.ID,
 			Student:      student,
+			IndexImage:   isTime.IndexImage,
 			Sentence:     isTime.Sentence,
 			Mode:         isTime.Mode,
 			ImageUrl:     isTime.ImageKey,

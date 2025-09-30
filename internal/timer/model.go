@@ -30,6 +30,7 @@ type Timer struct {
 type IsTime struct {
 	ID           primitive.ObjectID `json:"id" bson:"_id"`
 	StudentID    string             `json:"student_id" bson:"student_id"`
+	IndexImage   int                `json:"index_image" bson:"index_image"`
 	Sentence     string             `json:"sentence" bson:"sentence"`
 	Mode         string             `json:"mode" bson:"mode"`
 	ImageKey     string             `json:"image_key" bson:"image_key"`

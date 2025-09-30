@@ -32,6 +32,7 @@ type IsTimeResponse struct {
 	ID           primitive.ObjectID `json:"id" bson:"_id"`
 	Student      *user.UserInfor    `json:"student" bson:"student"`
 	Sentence     string             `json:"sentence" bson:"sentence"`
+	IndexImage   int                `json:"index_image" bson:"index_image"`
 	Mode         string             `json:"mode" bson:"mode"`
 	ImageUrl     string             `json:"image_url" bson:"image_url"`
 	CaptionImage string             `json:"caption_image" bson:"caption_image"`

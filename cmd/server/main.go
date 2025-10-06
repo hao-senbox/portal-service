@@ -11,9 +11,11 @@ import (
 	"portal/internal/bmi"
 	"portal/internal/body"
 	"portal/internal/drink"
+	"portal/internal/portal"
 	"portal/internal/timer"
 	"portal/internal/user"
 	"portal/pkg/consul"
+	"portal/pkg/uploader"
 	"portal/pkg/zap"
 	"syscall"
 	"time"
@@ -53,6 +55,8 @@ func main() {
 	}
 
 	userService := user.NewUserService(consulClient)
+	imageService := uploader.NewImageService(consulClient)
+
 	drinkCollection := mongoClient.Database(cfg.MongoDB).Collection("drinks")
 	drinkRepository := drink.NewDrinkRepository(drinkCollection)
 	drinkService := drink.NewDrinkService(drinkRepository, userService)
@@ -64,8 +68,9 @@ func main() {
 	bmiHandler := bmi.NewBMIHandler(bmiService)
 
 	timerCollection := mongoClient.Database(cfg.MongoDB).Collection("timers")
-	timerRepository := timer.NewTimerRepository(timerCollection)
-	timerService := timer.NewTimerService(timerRepository, userService)
+	isTimeCollection := mongoClient.Database(cfg.MongoDB).Collection("is_times")
+	timerRepository := timer.NewTimerRepository(timerCollection, isTimeCollection)
+	timerService := timer.NewTimerService(timerRepository, userService, imageService)
 	timerHandler := timer.NewTimerHandler(timerService)
 
 	bodyCollection := mongoClient.Database(cfg.MongoDB).Collection("bodies")
@@ -73,13 +78,18 @@ func main() {
 	bodyService := body.NewBodyService(bodyRepository, userService)
 	bodyHandler := body.NewBodyHandler(bodyService)
 
+	portalCollection := mongoClient.Database(cfg.MongoDB).Collection("portals")
+	portalRepository := portal.NewPortalRepository(portalCollection)
+	portalService := portal.NewPortalService(portalRepository)
+	portalHandler := portal.NewPortalHandlers(portalService)
+
 	router := gin.Default()
 
 	drink.RegisterRoutes(router, drinkHandler)
 	bmi.RegisterRoutes(router, bmiHandler)
 	timer.RegisterRoutes(router, timerHandler)
 	body.RegisterRoutes(router, bodyHandler)
-
+	portal.RegisterRoutes(router, portalHandler)
 	defer func() {
 		if err := mongoClient.Disconnect(context.Background()); err != nil {
 			logger.Fatal(err)

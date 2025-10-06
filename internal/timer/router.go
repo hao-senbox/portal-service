@@ -11,5 +11,9 @@ func RegisterRoutes(r *gin.Engine, TimerHandler *TimerHandler) {
 	{
 		group.GET("", TimerHandler.GetTimers)
 		group.POST("", TimerHandler.CreateTimer)
+
+
+		group.POST("/is-time", TimerHandler.CreateIsTime)
+		group.GET("/is-time", TimerHandler.GetIsTimes)
 	}
 }

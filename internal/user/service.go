@@ -9,6 +9,7 @@ import (
 	"os"
 	"portal/pkg/constants"
 	"portal/pkg/consul"
+	"time"
 
 	"github.com/hashicorp/consul/api"
 )
@@ -83,14 +84,22 @@ func NewServiceAPI(client *api.Client, serviceName string) *callAPI {
 	sd, err := consul.NewServiceDiscovery(client, serviceName)
 	if err != nil {
 		logErr("Error creating service discovery", err)
-		// Trả về đối tượng rỗng để các hàm call kiểm tra nil và fail-safe
 		return &callAPI{}
 	}
 
-	service, err := sd.DiscoverService()
-	if err != nil {
-		logErr("Error discovering service", err)
-		return &callAPI{}
+	var service *api.CatalogService
+
+	for i := 0; i < 10; i++ {
+		service, err = sd.DiscoverService()
+		if err == nil && service != nil {
+			break
+		}
+		fmt.Printf("Waiting for service %s... retry %d/10\n", serviceName, i+1)
+		time.Sleep(3 * time.Second)
+	}
+
+	if service == nil {
+		fmt.Printf("Service %s not found after retries, continuing anyway...\n", serviceName)
 	}
 
 	if os.Getenv("LOCAL_TEST") == "true" {

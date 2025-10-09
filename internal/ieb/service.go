@@ -33,7 +33,7 @@ func (service *iebService) CreateIEB(ctx context.Context, req *CreateIEBRequest,
 		return "", fmt.Errorf("owner_id is required")
 	}
 
-	if req.LanguageID == 0 {
+	if req.LanguageID == "" {
 		return "", fmt.Errorf("language_id is required")
 	}
 

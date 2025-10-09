@@ -10,7 +10,7 @@ type IEB struct {
 	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	Owner       *Owner             `json:"owner" bson:"owner"`
 	TermID      string             `json:"term_id" bson:"term_id"`
-	LanguageID  int                `json:"language_id" bson:"language_id"`
+	LanguageID  string                `json:"language_id" bson:"language_id"`
 	Information []Information      `json:"information" bson:"information"`
 	CreatedBy   string             `json:"created_by" bson:"created_by"`
 	CreatedAt   time.Time          `json:"created_at" bson:"created_at"`

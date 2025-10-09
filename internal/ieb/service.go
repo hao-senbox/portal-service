@@ -10,7 +10,7 @@ import (
 
 type IEBService interface {
 	CreateIEB(ctx context.Context, req *CreateIEBRequest, userID string) (string, error)
-	GetIEB(ctx context.Context, userID string, termID string, languageID int64) (*IEB, error)
+	GetIEB(ctx context.Context, userID string, termID string, languageKey string, regionKey string) (*IEB, error)
 }
 
 type iebService struct {
@@ -33,8 +33,12 @@ func (service *iebService) CreateIEB(ctx context.Context, req *CreateIEBRequest,
 		return "", fmt.Errorf("owner_id is required")
 	}
 
-	if req.LanguageID == "" {
+	if req.LanguageKey == "" {
 		return "", fmt.Errorf("language_id is required")
+	}
+
+	if req.RegionKey == "" {
+		return "", fmt.Errorf("region_id is required")
 	}
 
 	ID := primitive.NewObjectID()
@@ -43,7 +47,8 @@ func (service *iebService) CreateIEB(ctx context.Context, req *CreateIEBRequest,
 		ID:          ID,
 		Owner:       req.Owner,
 		TermID:      req.TermID,
-		LanguageID:  req.LanguageID,
+		LanguageKey: req.LanguageKey,
+		RegionKey:   req.RegionKey,
 		Information: req.Information,
 		CreatedBy:   userID,
 		CreatedAt:   time.Now(),
@@ -54,8 +59,8 @@ func (service *iebService) CreateIEB(ctx context.Context, req *CreateIEBRequest,
 
 }
 
-func (service *iebService) GetIEB(ctx context.Context, userID string, termID string, languageID int64) (*IEB, error) {
-	
+func (service *iebService) GetIEB(ctx context.Context, userID string, termID string, languageKey string, regionKey string) (*IEB, error) {
+
 	if termID == "" {
 		return nil, fmt.Errorf("term_id is required")
 	}
@@ -64,9 +69,13 @@ func (service *iebService) GetIEB(ctx context.Context, userID string, termID str
 		return nil, fmt.Errorf("user_id is required")
 	}
 
-	if languageID == 0 {
+	if languageKey == "" {
 		return nil, fmt.Errorf("language_id is required")
 	}
 
-	return service.iebRepository.GetIEB(ctx, userID, termID, languageID)
+	if regionKey == "" {
+		return nil, fmt.Errorf("region_id is required")
+	}
+
+	return service.iebRepository.GetIEB(ctx, userID, termID, languageKey, regionKey)
 }

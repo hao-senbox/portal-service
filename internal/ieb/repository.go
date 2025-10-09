@@ -9,7 +9,7 @@ import (
 
 type IEBRepository interface {
 	CreateIEB(ctx context.Context, data *IEB) error
-	GetIEB(ctx context.Context, userID string, termID string, languageID int64) (*IEB, error)
+	GetIEB(ctx context.Context, userID string, termID string, languageKey, regionKey string) (*IEB, error)
 }
 
 type iebRepository struct {
@@ -27,7 +27,8 @@ func (repository *iebRepository) CreateIEB(ctx context.Context, data *IEB) error
 	filter := bson.M{
 		"owner.owner_id": data.Owner.OwnerID,
 		"term_id":        data.TermID,
-		"language_id":    data.LanguageID,
+		"language_key":   data.LanguageKey,
+		"region_key":     data.RegionKey,
 	}
 
 	_, err := repository.IEBCollection.DeleteOne(ctx, filter)
@@ -40,12 +41,13 @@ func (repository *iebRepository) CreateIEB(ctx context.Context, data *IEB) error
 
 }
 
-func (repository *iebRepository) GetIEB(ctx context.Context, userID string, termID string, languageID int64) (*IEB, error) {
+func (repository *iebRepository) GetIEB(ctx context.Context, userID string, termID string, languageKey, regionKey string) (*IEB, error) {
 
 	filter := bson.M{
 		"owner.owner_id": userID,
 		"term_id":        termID,
-		"language_id":    languageID,
+		"language_key":   languageKey,
+		"region_key":     regionKey,
 	}
 
 	var ieb IEB
@@ -53,5 +55,5 @@ func (repository *iebRepository) GetIEB(ctx context.Context, userID string, term
 	err := repository.IEBCollection.FindOne(ctx, filter).Decode(&ieb)
 
 	return &ieb, err
-	
+
 }

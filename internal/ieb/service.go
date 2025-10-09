@@ -79,7 +79,7 @@ func (service *iebService) GetIEB(ctx context.Context, userID string, termID str
 
 	ieb, err := service.iebRepository.GetIEB(ctx, userID, termID, languageKey, regionKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get ieb: %v", err)
+		return nil, nil
 	}
 
 	return ieb, nil

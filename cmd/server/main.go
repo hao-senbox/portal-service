@@ -10,6 +10,7 @@ import (
 	"portal/internal/bmi"
 	"portal/internal/body"
 	"portal/internal/drink"
+	"portal/internal/ieb"
 	"portal/internal/portal"
 	"portal/internal/timer"
 	"portal/internal/user"
@@ -77,6 +78,11 @@ func main() {
 	portalService := portal.NewPortalService(portalRepository)
 	portalHandler := portal.NewPortalHandlers(portalService)
 
+	iebCollection := mongoClient.Database(cfg.MongoDB).Collection("iebs")
+	iebRepository := ieb.NewIEBRepository(iebCollection)
+	iebService := ieb.NewIEBService(iebRepository)
+	iebHandler := ieb.NewIEBHandler(iebService)
+
 	router := gin.Default()
 
 	drink.RegisterRoutes(router, drinkHandler)
@@ -84,6 +90,7 @@ func main() {
 	timer.RegisterRoutes(router, timerHandler)
 	body.RegisterRoutes(router, bodyHandler)
 	portal.RegisterRoutes(router, portalHandler)
+	ieb.RegisterRouters(router, iebHandler)
 	defer func() {
 		if err := mongoClient.Disconnect(context.Background()); err != nil {
 			logger.Fatal(err)

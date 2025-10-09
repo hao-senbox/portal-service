@@ -2,6 +2,7 @@ package ieb
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -53,7 +54,9 @@ func (repository *iebRepository) GetIEB(ctx context.Context, userID string, term
 	var ieb IEB
 
 	err := repository.IEBCollection.FindOne(ctx, filter).Decode(&ieb)
-
+	if err == mongo.ErrNoDocuments {
+		return nil, fmt.Errorf("ieb not found")
+	}
 	return &ieb, err
 
 }

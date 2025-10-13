@@ -14,6 +14,8 @@ type ProgramPlanerRepository interface {
 	GetProgramPlaner(ctx context.Context, id primitive.ObjectID) (*ProgramPlaner, error)
 	UpdateProgramPlaner(ctx context.Context, data *ProgramPlaner, id primitive.ObjectID) error
 	DeleteProgramPlaner(ctx context.Context, id primitive.ObjectID) error
+
+	CreateWeekProgramPlaner(ctx context.Context, req *CreateWeekProgramPlanerRequest, id primitive.ObjectID) error
 }
 
 type programPlannerRepository struct {
@@ -93,6 +95,19 @@ func (repository *programPlannerRepository) DeleteProgramPlaner(ctx context.Cont
 
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": bson.M{"is_deleted": true}}
+	
+	_, err := repository.programPlanerCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+func (repository *programPlannerRepository) CreateWeekProgramPlaner(ctx context.Context, req *CreateWeekProgramPlanerRequest, id primitive.ObjectID) error {
+	
+	filter := bson.M{"_id": id}
+	update := bson.M{"$push": bson.M{"weeks": req}}
 	
 	_, err := repository.programPlanerCollection.UpdateOne(ctx, filter, update)
 	if err != nil {

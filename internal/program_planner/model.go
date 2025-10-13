@@ -37,7 +37,8 @@ type WeekPlan struct {
 }
 
 type DailySlot struct {
-	DayOfWeek string `json:"day_of_week" bson:"day_of_week"`
-	Time      string `json:"time" bson:"time"`
-	Selected  bool   `json:"selected" bson:"selected"`
+	DayOfWeek string  `json:"day_of_week" bson:"day_of_week"`
+	Time      string  `json:"time" bson:"time"`
+	Selected  bool    `json:"selected" bson:"selected"`
+	Fee       float64 `json:"fee" bson:"fee"`
 }

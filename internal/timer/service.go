@@ -193,31 +193,11 @@ func (s *timerService) GetIsTimes(ctx context.Context, studentID string) ([]*IsT
 			isTime.ImageKey = ""
 		}
 
-		if isTime.RewardImageKey != "" {
-			imageUrl, err := s.ImageService.GetImageKey(ctx, isTime.RewardImageKey)
-			if err != nil {
-				return nil, err
-			}
-			if imageUrl != nil {
-				isTime.RewardImageKey = imageUrl.Url
-			} else {
-				isTime.RewardImageKey = ""
-			}
-		} else {
+		if isTime.RewardImageKey == "" {
 			isTime.RewardImageKey = ""
 		}
 
-		if isTime.BehaviourImageKey != "" {
-			imageUrl, err := s.ImageService.GetImageKey(ctx, isTime.BehaviourImageKey)
-			if err != nil {
-				return nil, err
-			}
-			if imageUrl != nil {
-				isTime.BehaviourImageKey = imageUrl.Url
-			} else {
-				isTime.BehaviourImageKey = ""
-			}
-		} else {
+		if isTime.BehaviourImageKey == "" {
 			isTime.BehaviourImageKey = ""
 		}
 

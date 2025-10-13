@@ -14,3 +14,7 @@ type UpdateProgramPlanerRequest struct {
 	Year           int            `json:"year" bson:"year"`
 	SelectedSlots  []SelectedSlot `json:"selected_slots" bson:"selected_slots"`
 }
+
+type CreateWeekProgramPlanerRequest struct {
+	Weeks []WeekPlan `json:"weeks" bson:"weeks"`
+}

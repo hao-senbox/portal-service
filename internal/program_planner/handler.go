@@ -143,5 +143,34 @@ func (handler *ProgramPlanerHandler) DeleteProgramPlaner(c *gin.Context) {
 	}
 
 	helper.SendSuccess(c, 200, "Delete program planer successfully", nil)
-	
+
+}
+
+func (handler *ProgramPlanerHandler) CreateWeekProgramPlaner(c *gin.Context) {
+
+	var req CreateWeekProgramPlanerRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		helper.SendError(c, http.StatusBadRequest, err, helper.ErrInvalidRequest)
+		return
+	}
+
+	token, exists := c.Get(constants.Token)
+	if !exists {
+		helper.SendError(c, 400, fmt.Errorf("token not found"), helper.ErrInvalidRequest)
+		return
+	}
+
+	id := c.Param("id")
+
+	ctx := context.WithValue(c, constants.TokenKey, token)
+
+	err := handler.ProgramPlanerService.CreateWeekProgramPlaner(ctx, &req, id)
+	if err != nil {
+		helper.SendError(c, 400, err, helper.ErrInvalidRequest)
+		return
+	}
+
+	helper.SendSuccess(c, 200, "Create week program planer successfully", nil)
+
 }

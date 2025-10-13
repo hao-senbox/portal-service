@@ -35,6 +35,8 @@ type IsTimeResponse struct {
 	IndexImage   int                `json:"index_image" bson:"index_image"`
 	Mode         string             `json:"mode" bson:"mode"`
 	ImageUrl     string             `json:"image_url" bson:"image_url"`
+	RewardUrl    string             `json:"reward_url" bson:"reward_url"`
+	BehaviourUrl string             `json:"behaviour_url" bson:"behaviour_url"`
 	CaptionImage string             `json:"caption_image" bson:"caption_image"`
 	ImageSize    string             `json:"image_size" bson:"image_size"`
 	Teacher      *user.UserInfor    `json:"teacher" bson:"teacher"`

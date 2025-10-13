@@ -145,17 +145,19 @@ func (s *timerService) CreateIsTime(ctx context.Context, req *CreateIsTimeReques
 	}
 
 	data := &IsTime{
-		ID:           primitive.NewObjectID(),
-		StudentID:    req.StudentID,
-		IndexImage:   req.IndexImage,
-		Sentence:     req.Sentence,
-		Mode:         req.Mode,
-		ImageKey:     req.ImageKey,
-		CaptionImage: req.CaptionImage,
-		ImageSize:    req.ImageSize,
-		CreatedBy:    userID,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
+		ID:                primitive.NewObjectID(),
+		StudentID:         req.StudentID,
+		IndexImage:        req.IndexImage,
+		Sentence:          req.Sentence,
+		Mode:              req.Mode,
+		ImageKey:          req.ImageKey,
+		CaptionImage:      req.CaptionImage,
+		ImageSize:         req.ImageSize,
+		RewardImageKey:    req.RewardImageKey,
+		BehaviourImageKey: req.BehaviourImageKey,
+		CreatedBy:         userID,
+		CreatedAt:         time.Now(),
+		UpdatedAt:         time.Now(),
 	}
 
 	return s.TimerRepository.CreateIsTime(ctx, data)
@@ -176,12 +178,47 @@ func (s *timerService) GetIsTimes(ctx context.Context, studentID string) ([]*IsT
 	var result []*IsTimeResponse
 
 	for _, isTime := range isTimes {
+
 		if isTime.ImageKey != "" {
 			imageUrl, err := s.ImageService.GetImageKey(ctx, isTime.ImageKey)
 			if err != nil {
 				return nil, err
 			}
-			isTime.ImageKey = imageUrl.Url
+			if imageUrl != nil {
+				isTime.ImageKey = imageUrl.Url
+			} else {
+				isTime.ImageKey = "" 
+			}
+		} else {
+			isTime.ImageKey = ""
+		}
+
+		if isTime.RewardImageKey != "" {
+			imageUrl, err := s.ImageService.GetImageKey(ctx, isTime.RewardImageKey)
+			if err != nil {
+				return nil, err
+			}
+			if imageUrl != nil {
+				isTime.RewardImageKey = imageUrl.Url
+			} else {
+				isTime.RewardImageKey = ""
+			}
+		} else {
+			isTime.RewardImageKey = ""
+		}
+
+		if isTime.BehaviourImageKey != "" {
+			imageUrl, err := s.ImageService.GetImageKey(ctx, isTime.BehaviourImageKey)
+			if err != nil {
+				return nil, err
+			}
+			if imageUrl != nil {
+				isTime.BehaviourImageKey = imageUrl.Url
+			} else {
+				isTime.BehaviourImageKey = ""
+			}
+		} else {
+			isTime.BehaviourImageKey = ""
 		}
 
 		student, err := s.UserService.GetStudentInfor(ctx, isTime.StudentID)
@@ -201,6 +238,8 @@ func (s *timerService) GetIsTimes(ctx context.Context, studentID string) ([]*IsT
 			Sentence:     isTime.Sentence,
 			Mode:         isTime.Mode,
 			ImageUrl:     isTime.ImageKey,
+			RewardUrl:    isTime.RewardImageKey,
+			BehaviourUrl: isTime.BehaviourImageKey,
 			CaptionImage: isTime.CaptionImage,
 			ImageSize:    isTime.ImageSize,
 			Teacher:      teacher,

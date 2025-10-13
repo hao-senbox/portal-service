@@ -70,31 +70,34 @@ func NewServiceAPI(client *api.Client, serviceName string) *callAPI {
 }
 
 func (s *imageService) GetImageKey(ctx context.Context, key string) (*Avatar, error) {
+	
+    token, ok := ctx.Value(constants.TokenKey).(string)
+    if !ok || token == "" {
+        return nil, fmt.Errorf("token not found in context")
+    }
 
-	token, ok := ctx.Value(constants.TokenKey).(string)
-	if !ok {
-		return nil, fmt.Errorf("token not found in context")
-	}
+    image, err := s.client.getImageKey(key, token)
+    if err != nil {
+        return nil, err
+    }
 
-	image, err := s.client.getImageKey(key, token)
+    if image != nil {
+        if sc, ok := image["status_code"].(float64); ok && int(sc) == 500 {
+            return nil, nil
+        }
+    }
 
-	if err != nil {
-		if sc, ok := image["status_code"].(float64); ok && int(sc) == 500 {
-			return nil, nil
-		}
-		return nil, err
-	}
+    if image == nil {
+        return nil, nil
+    }
+    innerData, ok := image["data"].(string)
+    if !ok || innerData == "" {
+        return nil, nil
+    }
 
-	innerData, ok := image["data"].(string)
-	if !ok || innerData == "" {
-		return nil, nil
-	}
-
-	return &Avatar{
-		Url: innerData,
-	}, nil
-
+    return &Avatar{Url: innerData}, nil
 }
+
 
 func (s *imageService) DeleteImageKey(ctx context.Context, key string) error {
 
@@ -142,38 +145,33 @@ func (c *callAPI) deleleImage(key string, token string) (error) {
 
 func (c *callAPI) getImageKey(key string, token string) (map[string]interface{}, error) {
 
-	endpoint := "/v1/images"
+    endpoint := "/v1/images"
+    header := map[string]string{
+        "Content-Type":  "application/json",
+        "Authorization": "Bearer " + token,
+    }
+    body := map[string]string{"key": key, "mode": "public"}
 
-	header := map[string]string{
-		"Content-Type":  "application/json",
-		"Authorization": "Bearer " + token,
-	}
+    jsonBody, err := json.Marshal(body)
+    if err != nil {
+        return nil, fmt.Errorf("error marshalling body: %v", err)
+    }
 
-	body := map[string]string{
-		"key":  key,
-		"mode": "public",
-	}
+    res, err := c.client.CallAPI(c.clientServer, endpoint, http.MethodPost, jsonBody, header)
+    if err != nil {
+        return nil, err
+    }
 
-	jsonBody, err := json.Marshal(body)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling body: %v", err)
-	}
+    var imageData interface{}
+    if err := json.Unmarshal([]byte(res), &imageData); err != nil {
+        return nil, fmt.Errorf("error unmarshalling response: %v", err)
+    }
 
-	res, err := c.client.CallAPI(c.clientServer, endpoint, http.MethodPost, jsonBody, header)
-	if err != nil {
-		fmt.Printf("Error calling API: %v\n", err)
-		return nil, err
-	}
+    myMap, ok := imageData.(map[string]interface{})
+    if !ok {
+        return nil, fmt.Errorf("unexpected response format")
+    }
+    return myMap, nil
 
-	var imageData interface{}
-
-	err = json.Unmarshal([]byte(res), &imageData)
-	if err != nil {
-		fmt.Printf("Error unmarshalling response: %v\n", err)
-		return nil, err
-	}
-
-	myMap := imageData.(map[string]interface{})
-
-	return myMap, nil
 }
+

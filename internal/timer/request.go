@@ -18,12 +18,14 @@ type CreateTimerRequest struct {
 }
 
 type CreateIsTimeRequest struct {
-	StudentID    string `json:"student_id" bson:"student_id"`
-	IndexImage   int    `json:"index_image" bson:"index_image"`
-	Sentence     string `json:"sentence" bson:"sentence"`
-	Mode         string `json:"mode" bson:"mode"`
-	ImageKey     string `json:"image_key" bson:"image_key"`
-	CaptionImage string `json:"caption_image" bson:"caption_image"`
-	ImageSize    string `json:"image_size" bson:"image_size"`
-	CreatedBy    string `json:"created_by" bson:"created_by"`
+	StudentID         string `json:"student_id" bson:"student_id"`
+	IndexImage        int    `json:"index_image" bson:"index_image"`
+	Sentence          string `json:"sentence" bson:"sentence"`
+	Mode              string `json:"mode" bson:"mode"`
+	ImageKey          string `json:"image_key" bson:"image_key"`
+	CaptionImage      string `json:"caption_image" bson:"caption_image"`
+	ImageSize         string `json:"image_size" bson:"image_size"`
+	RewardImageKey    string `json:"reward_image" bson:"reward_image"`
+	BehaviourImageKey string `json:"behaviour_image" bson:"behaviour_image"`
+	CreatedBy         string `json:"created_by" bson:"created_by"`
 }

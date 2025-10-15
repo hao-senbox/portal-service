@@ -13,6 +13,8 @@ import (
 	"portal/internal/ieb"
 	"portal/internal/portal"
 	"portal/internal/program_planner"
+	studyprogram "portal/internal/study_program"
+	teacherassign "portal/internal/teacher_assign"
 	"portal/internal/timer"
 	"portal/internal/user"
 	"portal/pkg/consul"
@@ -89,6 +91,16 @@ func main() {
 	programPlannerService := program_planner.NewProgramPlanerService(programPlannerRepository)
 	programPlannerHandler := program_planner.NewProgramPlanerHandler(programPlannerService)
 
+	teacherAssignmentCollection := mongoClient.Database(cfg.MongoDB).Collection("teacher_assignments")
+	teacherAssignmentRepository := teacherassign.NewTeacherAssignmentRepository(teacherAssignmentCollection)
+	teacherAssignmentService := teacherassign.NewTeacherAssignmentService(teacherAssignmentRepository)
+	teacherAssignmentHandler := teacherassign.NewTeacherAssignmentHandler(teacherAssignmentService)
+
+	studyProgramCollection := mongoClient.Database(cfg.MongoDB).Collection("study_programs")
+	studyProgramRepository := studyprogram.NewStudyProgramRepository(studyProgramCollection)
+	studyProgramService := studyprogram.NewStudyProgramService(studyProgramRepository)
+	studyProgramHandler := studyprogram.NewStudyProgramHandler(studyProgramService)
+
 	router := gin.Default()
 
 	drink.RegisterRoutes(router, drinkHandler)
@@ -98,7 +110,9 @@ func main() {
 	portal.RegisterRoutes(router, portalHandler)
 	ieb.RegisterRouters(router, iebHandler)
 	program_planner.RegisterRoutes(router, programPlannerHandler)
-	
+	teacherassign.RegisterRoutes(router, teacherAssignmentHandler)
+	studyprogram.RegisterRoutes(router, studyProgramHandler)
+
 	defer func() {
 		if err := mongoClient.Disconnect(context.Background()); err != nil {
 			logger.Fatal(err)

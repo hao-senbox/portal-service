@@ -15,6 +15,6 @@ func RegisterRoutes(r *gin.Engine, handler *ProgramPlanerHandler) {
 		group.PUT("/:id", handler.UpdateProgramPlaner)
 		group.DELETE("/:id", handler.DeleteProgramPlaner)
 
-		// group.POST("/week/:id", handler.UpdateProgramPlanerWeek)
+		group.POST("/week/:id", handler.UpdateProgramPlanerWeek)
 	}
 }

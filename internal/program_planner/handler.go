@@ -146,9 +146,9 @@ func (handler *ProgramPlanerHandler) DeleteProgramPlaner(c *gin.Context) {
 
 }
 
-func (handler *ProgramPlanerHandler) CreateWeekProgramPlaner(c *gin.Context) {
+func (handler *ProgramPlanerHandler) UpdateProgramPlanerWeek(c *gin.Context) {
 
-	var req CreateWeekProgramPlanerRequest
+	var req UpdateWeekProgramPlanerRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		helper.SendError(c, http.StatusBadRequest, err, helper.ErrInvalidRequest)
@@ -165,7 +165,7 @@ func (handler *ProgramPlanerHandler) CreateWeekProgramPlaner(c *gin.Context) {
 
 	ctx := context.WithValue(c, constants.TokenKey, token)
 
-	err := handler.ProgramPlanerService.CreateWeekProgramPlaner(ctx, &req, id)
+	err := handler.ProgramPlanerService.UpdateProgramPlanerWeek(ctx, &req, id)
 	if err != nil {
 		helper.SendError(c, 400, err, helper.ErrInvalidRequest)
 		return

@@ -15,7 +15,7 @@ type ProgramPlanerRepository interface {
 	UpdateProgramPlaner(ctx context.Context, data *ProgramPlaner, id primitive.ObjectID) error
 	DeleteProgramPlaner(ctx context.Context, id primitive.ObjectID) error
 
-	CreateWeekProgramPlaner(ctx context.Context, req *CreateWeekProgramPlanerRequest, id primitive.ObjectID) error
+	UpdateProgramPlanerWeek(ctx context.Context, data *ProgramPlaner, id primitive.ObjectID) error
 }
 
 type programPlannerRepository struct {
@@ -29,6 +29,15 @@ func NewProgramPlanerRepository(collection *mongo.Collection) ProgramPlanerRepos
 }
 
 func (repository *programPlannerRepository) CreateProgramPlaner(ctx context.Context, data *ProgramPlaner) (string, error) {
+
+	filter := bson.M{
+		"month": data.Month,
+		"year":  data.Year,
+	}
+
+	if _, err := repository.programPlanerCollection.DeleteMany(ctx, filter); err != nil {
+		return "", err
+	}
 
 	result, err := repository.programPlanerCollection.InsertOne(ctx, data)
 
@@ -78,15 +87,15 @@ func (repository *programPlannerRepository) GetProgramPlaner(ctx context.Context
 }
 
 func (repository *programPlannerRepository) UpdateProgramPlaner(ctx context.Context, data *ProgramPlaner, id primitive.ObjectID) error {
-	
+
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": data}
-	
+
 	_, err := repository.programPlanerCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 
 }
@@ -95,24 +104,28 @@ func (repository *programPlannerRepository) DeleteProgramPlaner(ctx context.Cont
 
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": bson.M{"is_deleted": true}}
-	
+
 	_, err := repository.programPlanerCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
-func (repository *programPlannerRepository) CreateWeekProgramPlaner(ctx context.Context, req *CreateWeekProgramPlanerRequest, id primitive.ObjectID) error {
-	
-	filter := bson.M{"_id": id}
-	update := bson.M{"$push": bson.M{"weeks": req}}
-	
+func (repository *programPlannerRepository) UpdateProgramPlanerWeek(ctx context.Context, data *ProgramPlaner, id primitive.ObjectID) error {
+
+	filter := bson.M{
+		"_id": id,
+	}
+
+	update := bson.M{"$set": data}
+
 	_, err := repository.programPlanerCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
+
 }

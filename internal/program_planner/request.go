@@ -10,11 +10,14 @@ type CreateProgramPlanerRequest struct {
 }
 
 type UpdateProgramPlanerRequest struct {
-	Month          int            `json:"month" bson:"month"`
-	Year           int            `json:"year" bson:"year"`
-	SelectedSlots  []SelectedSlot `json:"selected_slots" bson:"selected_slots"`
+	Month         int            `json:"month" bson:"month"`
+	Year          int            `json:"year" bson:"year"`
+	SelectedSlots []SelectedSlot `json:"selected_slots" bson:"selected_slots"`
 }
 
-type CreateWeekProgramPlanerRequest struct {
-	Weeks []WeekPlan `json:"weeks" bson:"weeks"`
+type UpdateWeekProgramPlanerRequest struct {
+	WeekNumber int     `json:"week_number" binding:"required"`
+	DayOfWeek  string  `json:"day_of_week" binding:"required"`
+	Time       string  `json:"time" binding:"required"`
+	SlotFee    float64 `json:"slot_fee" binding:"required"`
 }

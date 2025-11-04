@@ -43,10 +43,23 @@ func (s *selectOptionsService) CreateSelectOption(ctx context.Context, req Creat
 		return "", fmt.Errorf("options array cannot be empty")
 	}
 
-	for i, opt := range req.Options {
-		if opt.Name == "" {
-			return "", fmt.Errorf("options[%d].name is required", i)
+	var options []Options
+
+	if req.Type == "select_topic" {
+		options = []Options{
+			{TopicID: "6909c4192c3eb1f1800d757d", Order: 1},
+			{TopicID: "6909c4d5c3189f6c406ba20c", Order: 2},
+			{TopicID: "6909c4f9c3189f6c406ba20d", Order: 3},
+			{TopicID: "6909c515c3189f6c406ba20e", Order: 4},
 		}
+		if len(req.Options) > 0 {
+			options = append(options, req.Options...)
+		}
+	} else {
+		options = req.Options
+	}
+
+	for i, opt := range req.Options {
 		if opt.Order == 0 {
 			opt.Order = i + 1
 			req.Options[i] = opt
@@ -70,7 +83,7 @@ func (s *selectOptionsService) CreateSelectOption(ctx context.Context, req Creat
 		StudentID:      req.StudentID,
 		TermID:         term.ID,
 		Type:           req.Type,
-		Options:        req.Options,
+		Options:        options,
 		CreatedBy:      userID,
 		UpdatedBy:      userID,
 		CreatedAt:      time.Now(),

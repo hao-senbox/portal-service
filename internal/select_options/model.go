@@ -21,9 +21,10 @@ type SelectOptions struct {
 }
 
 type Options struct {
-	Name      string  `json:"name" bson:"name"`
+	Name      string  `json:"name,omitempty" bson:"name,omitempty"`
 	Order     int     `json:"order" bson:"order"`
 	Icon      *string `json:"icon,omitempty" bson:"icon,omitempty"`         // Required for iep_priority, select_topic
 	Status    *string `json:"status,omitempty" bson:"status,omitempty"`     // Required for topic_planner
 	Optionals *string `json:"optional,omitempty" bson:"optional,omitempty"` // Required for topic_planner
+	TopicID   string `json:"topic_id,omitempty" bson:"topic_id,omitempty"` // Required for topic_planner
 }

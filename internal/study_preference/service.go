@@ -3,7 +3,10 @@ package studypreference
 import (
 	"context"
 	"fmt"
+	selectoptions "portal/internal/select_options"
 	"portal/internal/term"
+	"portal/internal/topic"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -19,11 +22,23 @@ type StudyPreferenceService interface {
 
 type studyPreferenceService struct {
 	studyPreferenceRepository StudyPreferenceRepository
-	termService term.TermService
+	termService               term.TermService
+	selectOptionsRepository   selectoptions.SelectOptionsRepository
+	topicService              topic.TopicService
 }
 
-func NewStudyPreferenceService(studyPreferenceRepository StudyPreferenceRepository, termService term.TermService) StudyPreferenceService {
-	return &studyPreferenceService{studyPreferenceRepository: studyPreferenceRepository, termService: termService}
+func NewStudyPreferenceService(
+	studyPreferenceRepository StudyPreferenceRepository,
+	termService term.TermService,
+	selectOptionsRepository selectoptions.SelectOptionsRepository,
+	topicService topic.TopicService,
+) StudyPreferenceService {
+	return &studyPreferenceService{
+		studyPreferenceRepository: studyPreferenceRepository,
+		termService:               termService,
+		selectOptionsRepository:   selectOptionsRepository,
+		topicService:              topicService,
+	}
 }
 
 func (s *studyPreferenceService) CreateStudyPreference(ctx context.Context, req *CreateStudyPreferenceRequest, userID string) (string, error) {
@@ -112,7 +127,6 @@ func (s *studyPreferenceService) GetStudyPreferencesByStudentID(ctx context.Cont
 	return data, nil
 }
 
-
 func (s *studyPreferenceService) GetStudyPreferenceByID(ctx context.Context, id string) (*StudyPreference, error) {
 
 	if id == "" {
@@ -183,5 +197,100 @@ func (s *studyPreferenceService) UpdateStudyPreference(ctx context.Context, id s
 }
 
 func (s *studyPreferenceService) GetStudyPreferenceStatistical(ctx context.Context, orgID, studentID string) (map[string]interface{}, error) {
-	return nil, nil
+
+	term, err := s.termService.GetCurrentTermByOrgID(ctx, orgID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get current term by org id: %w", err)
+	}
+
+	if term == nil {
+		return nil, fmt.Errorf("current term not found")
+	}
+
+	iepPriority, err := s.selectOptionsRepository.GetSelectOption(ctx, "iep_priority", orgID, term.ID, studentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get iep priority: %w", err)
+	}
+
+	topicPlanner, err := s.selectOptionsRepository.GetSelectOption(ctx, "topic_planner", orgID, term.ID, studentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get topic planner: %w", err)
+	}
+
+	lifeSkills, err := s.selectOptionsRepository.GetSelectOption(ctx, "life_skills", orgID, term.ID, studentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get life skills: %w", err)
+	}
+
+	selectTopic, err := s.selectOptionsRepository.GetSelectOption(ctx, "select_topic", orgID, term.ID, studentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get select topic: %w", err)
+	}
+
+	result := make(map[string]interface{})
+
+	if iepPriority != nil && len(iepPriority.Options) > 0 {
+		var names []string
+		for _, opt := range iepPriority.Options {
+			if opt.Name != "" {
+				names = append(names, opt.Name)
+			}
+		}
+		if len(names) > 0 {
+			result["iep_priority"] = "" + strings.Join(names, ", ")
+		}
+	} else {
+		result["iep_priority"] = "No iep priority"
+	}
+
+	if topicPlanner != nil && len(topicPlanner.Options) > 0 {
+		var topics []string
+		for _, opt := range topicPlanner.Options {
+			if opt.Name != "" && opt.Status != nil {
+				topics = append(topics, fmt.Sprintf("%s → %s", opt.Name, *opt.Status))
+			}
+		}
+		if len(topics) > 0 {
+			result["topic_planner"] = "" + strings.Join(topics, ", ")
+		}
+	} else {
+		result["topic_planner"] = "No topic planner"
+	}
+
+	if lifeSkills != nil && len(lifeSkills.Options) > 0 {
+		var skills []string
+		for _, opt := range lifeSkills.Options {
+			if opt.Name != "" {
+				skills = append(skills, opt.Name)
+			}
+		}
+		if len(skills) > 0 {
+			result["life_skills"] = "" + strings.Join(skills, ", ")
+		}
+	}  else {
+		result["life_skills"] = "No life skills"
+	}
+
+	// Format Select Topic
+	if selectTopic != nil && len(selectTopic.Options) > 0 {
+		var topicNames []string
+		for _, opt := range selectTopic.Options {
+			if opt.TopicID != "" {
+				topic, err := s.topicService.GetTopicInfor(ctx, opt.TopicID)
+				if err != nil {
+					return nil, fmt.Errorf("failed to get topic information: %w", err)
+				}
+				if topic != nil && topic.Name != "" {
+					topicNames = append(topicNames, topic.Name)
+				}
+			}
+		}
+		if len(topicNames) > 0 {
+			result["select_topic"] = "" + strings.Join(topicNames, ", ")
+		}
+	} else {
+		result["select_topic"] = "No select topic"
+	}
+
+	return result, nil
 }

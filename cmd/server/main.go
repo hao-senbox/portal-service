@@ -19,6 +19,7 @@ import (
 	teacherassign "portal/internal/teacher_assign"
 	"portal/internal/term"
 	"portal/internal/timer"
+	"portal/internal/topic"
 	"portal/internal/user"
 	"portal/pkg/consul"
 	"portal/pkg/uploader"
@@ -58,6 +59,7 @@ func main() {
 	userService := user.NewUserService(consulClient)
 	imageService := uploader.NewImageService(consulClient)
 	termService := term.NewTermService(consulClient)
+	topicService := topic.NewTopicService(consulClient)
 
 	drinkCollection := mongoClient.Database(cfg.MongoDB).Collection("drinks")
 	drinkRepository := drink.NewDrinkRepository(drinkCollection)
@@ -112,7 +114,7 @@ func main() {
 
 	studyPreferenceCollection := mongoClient.Database(cfg.MongoDB).Collection("study_preferences")
 	studyPreferenceRepository := studypreference.NewStudyPreferenceRepository(studyPreferenceCollection)
-	studyPreferenceService := studypreference.NewStudyPreferenceService(studyPreferenceRepository, termService)
+	studyPreferenceService := studypreference.NewStudyPreferenceService(studyPreferenceRepository, termService, selectOptionsRepository, topicService)
 	studyPreferenceHandler := studypreference.NewStudyPreferenceHandler(studyPreferenceService)
 
 	router := gin.Default()

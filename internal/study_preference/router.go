@@ -13,5 +13,7 @@ func RegisterRoutes(r *gin.Engine, handler *StudyPreferenceHandler) {
 		group.GET("", handler.GetStudyPreferencesByStudentID)
 		group.GET("/:id", handler.GetStudyPreferenceByID)
 		group.PUT("/:id", handler.UpdateStudyPreference)
+
+		group.GET("/admin/statistical", handler.GetStudyPreferenceStatistical)
 	}
 }

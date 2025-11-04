@@ -14,6 +14,7 @@ type StudyPreferenceService interface {
 	GetStudyPreferencesByStudentID(ctx context.Context, studentID, orgID string) (*StudyPreference, error)
 	GetStudyPreferenceByID(ctx context.Context, id string) (*StudyPreference, error)
 	UpdateStudyPreference(ctx context.Context, id string, req *UpdateStudyPreferenceRequest, userID string) error
+	GetStudyPreferenceStatistical(ctx context.Context, orgID, studentID string) (map[string]interface{}, error)
 }
 
 type studyPreferenceService struct {
@@ -179,4 +180,8 @@ func (s *studyPreferenceService) UpdateStudyPreference(ctx context.Context, id s
 	}
 
 	return s.studyPreferenceRepository.UpdateStudyPreference(ctx, objectID, updateData)
+}
+
+func (s *studyPreferenceService) GetStudyPreferenceStatistical(ctx context.Context, orgID, studentID string) (map[string]interface{}, error) {
+	return nil, nil
 }

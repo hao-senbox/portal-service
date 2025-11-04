@@ -148,3 +148,34 @@ func (h *StudyPreferenceHandler) UpdateStudyPreference(c *gin.Context) {
 		"id": id,
 	})
 }
+
+func (h *StudyPreferenceHandler) GetStudyPreferenceStatistical(c *gin.Context) {
+
+	orgID := c.Query("organization_id")
+	if orgID == "" {
+		helper.SendError(c, http.StatusBadRequest, nil, "Organization ID is required")
+		return
+	}
+
+	studentID := c.Query("student_id")
+	if studentID == "" {
+		helper.SendError(c, http.StatusBadRequest, nil, "Student ID is required")
+		return
+	}
+
+	token, exists := c.Get(constants.Token)
+	if !exists {
+		helper.SendError(c, http.StatusBadRequest, nil, "Token not found")
+		return
+	}
+
+	ctx := context.WithValue(c, constants.TokenKey, token)
+
+	statistical, err := h.service.GetStudyPreferenceStatistical(ctx, orgID, studentID)
+	if err != nil {
+		helper.SendError(c, http.StatusBadRequest, err, "Failed to get study preference statistical")
+		return
+	}
+
+	helper.SendSuccess(c, http.StatusOK, "Get study preference statistical successfully", statistical)
+}

@@ -1,6 +1,7 @@
 package selectoptions
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -20,7 +21,6 @@ func NewSelectOptionsHandler(service SelectOptionsService) *SelectOptionsHandler
 	}
 }
 
-
 func (h *SelectOptionsHandler) CreateSelectOption(c *gin.Context) {
 
 	var req CreateSelectOptionRequest
@@ -36,7 +36,15 @@ func (h *SelectOptionsHandler) CreateSelectOption(c *gin.Context) {
 		return
 	}
 
-	id, err := h.service.CreateSelectOption(c.Request.Context(), req, userID.(string))
+	token, exists := c.Get(constants.Token)
+	if !exists {
+		helper.SendError(c, http.StatusBadRequest, nil, "Token not found")
+		return
+	}
+
+	ctx := context.WithValue(c, constants.TokenKey, token)
+
+	id, err := h.service.CreateSelectOption(ctx, req, userID.(string))
 	if err != nil {
 		helper.SendError(c, http.StatusInternalServerError, err, "Failed to create select option")
 		return

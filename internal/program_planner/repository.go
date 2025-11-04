@@ -33,6 +33,8 @@ func (repository *programPlannerRepository) CreateProgramPlaner(ctx context.Cont
 	filter := bson.M{
 		"month": data.Month,
 		"year":  data.Year,
+		"student_id": data.StudentID,
+		"organization_id": data.OrganizationID,
 	}
 
 	if _, err := repository.programPlanerCollection.DeleteMany(ctx, filter); err != nil {

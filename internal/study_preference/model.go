@@ -21,11 +21,11 @@ type StudyPreference struct {
 }
 
 type Data struct {
-	Pairs []Pair `json:"pairs" bson:"pairs"`
-	Selected string	 `json:"selected" bson:"selected"`
+	Pairs    []Pair                 `json:"pairs" bson:"pairs"`
+	Selector map[string]interface{} `json:"selector,omitempty" bson:"-"`
 }
 
 type Pair struct {
 	Category string `json:"category" bson:"category"`
-	Value    int `json:"value" bson:"value"`
+	Value    int    `json:"value" bson:"value"`
 }

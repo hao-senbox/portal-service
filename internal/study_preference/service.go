@@ -15,7 +15,7 @@ import (
 type StudyPreferenceService interface {
 	CreateStudyPreference(ctx context.Context, req *CreateStudyPreferenceRequest, userID string) (string, error)
 	GetStudyPreferencesByStudentID(ctx context.Context, studentID, orgID string) (*StudyPreference, error)
-	GetStudyPreferenceByID(ctx context.Context, id string) (*StudyPreference, error)
+	// GetStudyPreferenceByID(ctx context.Context, id string) (*StudyPreference, error)
 	UpdateStudyPreference(ctx context.Context, id string, req *UpdateStudyPreferenceRequest, userID string) error
 	GetStudyPreferenceStatistical(ctx context.Context, orgID, studentID string) (map[string]interface{}, error)
 }
@@ -76,12 +76,13 @@ func (s *studyPreferenceService) CreateStudyPreference(ctx context.Context, req 
 }
 
 func (s *studyPreferenceService) GetStudyPreferencesByStudentID(ctx context.Context, studentID, orgID string) (*StudyPreference, error) {
+
 	if studentID == "" {
-		return nil, fmt.Errorf("student_id is required")
+		return nil, fmt.Errorf("student id is required")
 	}
 
 	if orgID == "" {
-		return nil, fmt.Errorf("organization_id is required")
+		return nil, fmt.Errorf("org id is required")
 	}
 
 	term, err := s.termService.GetCurrentTermByOrgID(ctx, orgID)
@@ -95,63 +96,67 @@ func (s *studyPreferenceService) GetStudyPreferencesByStudentID(ctx context.Cont
 
 	data, err := s.studyPreferenceRepository.GetStudyPreferencesByStudentID(ctx, studentID, term.ID, orgID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get study preferences by student id: %w", err)
-	}
-
-	for i := range data.TeacherSelection {
-		if len(data.TeacherSelection[i].Pairs) == 2 {
-			pairs := data.TeacherSelection[i].Pairs
-			if pairs[0].Value > pairs[1].Value {
-				data.TeacherSelection[i].Selected = pairs[0].Category
-			} else if pairs[1].Value > pairs[0].Value {
-				data.TeacherSelection[i].Selected = pairs[1].Category
-			} else {
-				data.TeacherSelection[i].Selected = "equal"
-			}
-		}
-	}
-
-	for i := range data.ParentSelection {
-		if len(data.ParentSelection[i].Pairs) == 2 {
-			pairs := data.ParentSelection[i].Pairs
-			if pairs[0].Value > pairs[1].Value {
-				data.ParentSelection[i].Selected = pairs[0].Category
-			} else if pairs[1].Value > pairs[0].Value {
-				data.ParentSelection[i].Selected = pairs[1].Category
-			} else {
-				data.ParentSelection[i].Selected = "equal"
-			}
-		}
-	}
-
-	return data, nil
-}
-
-func (s *studyPreferenceService) GetStudyPreferenceByID(ctx context.Context, id string) (*StudyPreference, error) {
-
-	if id == "" {
-		return nil, fmt.Errorf("study preference id is required")
-	}
-
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, fmt.Errorf("invalid study preference id format: %w", err)
-	}
-
-	data, err := s.studyPreferenceRepository.GetStudyPreferenceByID(ctx, objectID)
-	if err != nil {
 		return nil, fmt.Errorf("failed to get study preference by id: %w", err)
 	}
 
+	top := []string{
+		"Managing Self",
+		"Gross Motor",
+		"Writing",
+		"Self Help",
+		"Contributing Arts",
+		"Group Work",
+	}
+
+	bottom := []string{
+		"Socialize",
+		"Fine Motor",
+		"Drawing",
+		"Life Skill",
+		"Participating",
+		"Independence",
+	}
+
+	isInArray := func(arr []string, val string) bool {
+		for _, v := range arr {
+			if strings.EqualFold(v, val) {
+				return true
+			}
+		}
+		return false
+	}
+
+	// ✅ xử lý TeacherSelection
 	for i := range data.TeacherSelection {
 		if len(data.TeacherSelection[i].Pairs) == 2 {
 			pairs := data.TeacherSelection[i].Pairs
-			if pairs[0].Value > pairs[1].Value {
-				data.TeacherSelection[i].Selected = pairs[0].Category
-			} else if pairs[1].Value > pairs[0].Value {
-				data.TeacherSelection[i].Selected = pairs[1].Category
+			p1, p2 := pairs[0], pairs[1]
+
+			var chosen Pair
+			if p1.Value > p2.Value {
+				chosen = p1
+			} else if p2.Value > p1.Value {
+				chosen = p2
 			} else {
-				data.TeacherSelection[i].Selected = "equal"
+				data.TeacherSelection[i].Selector = map[string]interface{}{
+					"name":  "equal",
+					"value": 50,
+				}
+				continue
+			}
+
+			var selectorName string
+			if isInArray(top, chosen.Category) {
+				selectorName = "bottom"
+			} else if isInArray(bottom, chosen.Category) {
+				selectorName = "top"
+			} else {
+				selectorName = "unknown"
+			}
+
+			data.TeacherSelection[i].Selector = map[string]interface{}{
+				"name":  selectorName,
+				"value": 100 - chosen.Value,
 			}
 		}
 	}
@@ -159,18 +164,86 @@ func (s *studyPreferenceService) GetStudyPreferenceByID(ctx context.Context, id 
 	for i := range data.ParentSelection {
 		if len(data.ParentSelection[i].Pairs) == 2 {
 			pairs := data.ParentSelection[i].Pairs
-			if pairs[0].Value > pairs[1].Value {
-				data.ParentSelection[i].Selected = pairs[0].Category
-			} else if pairs[1].Value > pairs[0].Value {
-				data.ParentSelection[i].Selected = pairs[1].Category
+			p1, p2 := pairs[0], pairs[1]
+
+			var chosen Pair
+			if p1.Value > p2.Value {
+				chosen = p1
+			} else if p2.Value > p1.Value {
+				chosen = p2
 			} else {
-				data.ParentSelection[i].Selected = "equal"
+				data.ParentSelection[i].Selector = map[string]interface{}{
+					"name":  "equal",
+					"value": 50,
+				}
+				continue
+			}
+
+			var selectorName string
+			if isInArray(top, chosen.Category) {
+				selectorName = "bottom"
+			} else if isInArray(bottom, chosen.Category) {
+				selectorName = "top"
+			} else {
+				selectorName = "unknown"
+			}
+
+			data.ParentSelection[i].Selector = map[string]interface{}{
+				"name":  selectorName,
+				"value": 100 - chosen.Value,
 			}
 		}
 	}
 
 	return data, nil
 }
+
+
+
+// func (s *studyPreferenceService) GetStudyPreferenceByID(ctx context.Context, id string) (*StudyPreference, error) {
+
+// 	if id == "" {
+// 		return nil, fmt.Errorf("study preference id is required")
+// 	}
+
+// 	objectID, err := primitive.ObjectIDFromHex(id)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("invalid study preference id format: %w", err)
+// 	}
+
+// 	data, err := s.studyPreferenceRepository.GetStudyPreferenceByID(ctx, objectID)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to get study preference by id: %w", err)
+// 	}
+
+// 	for i := range data.TeacherSelection {
+// 		if len(data.TeacherSelection[i].Pairs) == 2 {
+// 			pairs := data.TeacherSelection[i].Pairs
+// 			if pairs[0].Value > pairs[1].Value {
+// 				data.TeacherSelection[i] = pairs[0].Category
+// 			} else if pairs[1].Value > pairs[0].Value {
+// 				data.TeacherSelection[i] = pairs[1].Category
+// 			} else {
+// 				data.TeacherSelection[i] = "equal"
+// 			}
+// 		}
+// 	}
+
+// 	for i := range data.ParentSelection {
+// 		if len(data.ParentSelection[i].Pairs) == 2 {
+// 			pairs := data.ParentSelection[i].Pairs
+// 			if pairs[0].Value > pairs[1].Value {
+// 				data.ParentSelection[i] = pairs[0].Category
+// 			} else if pairs[1].Value > pairs[0].Value {
+// 				data.ParentSelection[i] = pairs[1].Category
+// 			} else {
+// 				data.ParentSelection[i] = "equal"
+// 			}
+// 		}
+// 	}
+
+// 	return data, nil
+// }
 
 func (s *studyPreferenceService) UpdateStudyPreference(ctx context.Context, id string, req *UpdateStudyPreferenceRequest, userID string) error {
 
@@ -267,7 +340,7 @@ func (s *studyPreferenceService) GetStudyPreferenceStatistical(ctx context.Conte
 		if len(skills) > 0 {
 			result["life_skills"] = "" + strings.Join(skills, ", ")
 		}
-	}  else {
+	} else {
 		result["life_skills"] = "No life skills"
 	}
 

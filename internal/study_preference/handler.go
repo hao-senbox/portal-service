@@ -78,33 +78,33 @@ func (h *StudyPreferenceHandler) GetStudyPreferencesByStudentID(c *gin.Context) 
 	helper.SendSuccess(c, http.StatusOK, "Get study preferences by student ID successfully", studyPreferences)
 }
 
-func (h *StudyPreferenceHandler) GetStudyPreferenceByID(c *gin.Context) {
+// func (h *StudyPreferenceHandler) GetStudyPreferenceByID(c *gin.Context) {
 	
-	id := c.Param("id")
+// 	id := c.Param("id")
 
-	if id == "" {
-		helper.SendError(c, http.StatusBadRequest, nil, "Study preference ID is required")
-		return
-	}
+// 	if id == "" {
+// 		helper.SendError(c, http.StatusBadRequest, nil, "Study preference ID is required")
+// 		return
+// 	}
 
-	token, exists := c.Get(constants.Token)
-	if !exists {
-		helper.SendError(c, http.StatusBadRequest, nil, "Token not found")
-		return
-	}
+// 	token, exists := c.Get(constants.Token)
+// 	if !exists {
+// 		helper.SendError(c, http.StatusBadRequest, nil, "Token not found")
+// 		return
+// 	}
 
-	ctx := context.WithValue(c, constants.TokenKey, token)
+// 	ctx := context.WithValue(c, constants.TokenKey, token)
 
-	studyPreference, err := h.service.GetStudyPreferenceByID(ctx, id)
-	if err != nil {
-		helper.SendError(c, http.StatusBadRequest, err, helper.ErrInvalidRequest)
-		return
-	}
+// 	studyPreference, err := h.service.GetStudyPreferenceByID(ctx, id)
+// 	if err != nil {
+// 		helper.SendError(c, http.StatusBadRequest, err, helper.ErrInvalidRequest)
+// 		return
+// 	}
 
-	helper.SendSuccess(c, http.StatusOK, "Get study preference by ID successfully", studyPreference)
+// 	helper.SendSuccess(c, http.StatusOK, "Get study preference by ID successfully", studyPreference)
 
 
-}
+// }
 
 func (h *StudyPreferenceHandler) UpdateStudyPreference(c *gin.Context) {
 	id := c.Param("id")

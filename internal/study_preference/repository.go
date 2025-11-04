@@ -11,6 +11,7 @@ import (
 
 type StudyPreferenceRepository interface {
 	CreateStudyPreference(ctx context.Context, studyPreference *StudyPreference) error
+	GetStudyPreferencesByStudentID(ctx context.Context, studentID, termID, orgID string) (*StudyPreference, error)
 	UpdateStudyPreference(ctx context.Context, id primitive.ObjectID, updateData map[string]interface{}) error
 	GetStudyPreferenceByID(ctx context.Context, id primitive.ObjectID) (*StudyPreference, error)
 }
@@ -24,12 +25,45 @@ func NewStudyPreferenceRepository(collection *mongo.Collection) StudyPreferenceR
 }
 
 func (r *studyPreferenceRepository) CreateStudyPreference(ctx context.Context, studyPreference *StudyPreference) error {
+	
+	filter := bson.M{
+		"student_id": studyPreference.StudentID,
+		"term_id": studyPreference.TermID,
+		"organization_id": studyPreference.OrganizationID,
+		"is_deleted": false,
+	}
+
+	_, err := r.collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+
 	result, err := r.collection.InsertOne(ctx, studyPreference)
 	if err != nil {
 		return err
 	}
+
 	studyPreference.ID = result.InsertedID.(primitive.ObjectID)
+
 	return nil
+}
+
+func (r *studyPreferenceRepository) GetStudyPreferencesByStudentID(ctx context.Context, studentID, termID, orgID string) (*StudyPreference, error) {
+	var studyPreference *StudyPreference
+	
+	filter := bson.M{
+		"student_id": studentID,
+		"term_id": termID,
+		"is_deleted": false,
+		"organization_id": orgID,
+	}
+
+	err := r.collection.FindOne(ctx, filter).Decode(&studyPreference)
+	if err != nil {
+		return nil, err
+	}
+
+	return studyPreference, nil
 }
 
 func (r *studyPreferenceRepository) UpdateStudyPreference(ctx context.Context, id primitive.ObjectID, updateData map[string]interface{}) error {

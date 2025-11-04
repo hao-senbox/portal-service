@@ -17,6 +17,7 @@ import (
 	studypreference "portal/internal/study_preference"
 	studyprogram "portal/internal/study_program"
 	teacherassign "portal/internal/teacher_assign"
+	"portal/internal/term"
 	"portal/internal/timer"
 	"portal/internal/user"
 	"portal/pkg/consul"
@@ -56,6 +57,7 @@ func main() {
 
 	userService := user.NewUserService(consulClient)
 	imageService := uploader.NewImageService(consulClient)
+	termService := term.NewTermService(consulClient)
 
 	drinkCollection := mongoClient.Database(cfg.MongoDB).Collection("drinks")
 	drinkRepository := drink.NewDrinkRepository(drinkCollection)
@@ -105,12 +107,12 @@ func main() {
 
 	selectOptionsCollection := mongoClient.Database(cfg.MongoDB).Collection("select_options")
 	selectOptionsRepository := selectoptions.NewSelectOptionsRepository(selectOptionsCollection)
-	selectOptionsService := selectoptions.NewSelectOptionsService(selectOptionsRepository)
+	selectOptionsService := selectoptions.NewSelectOptionsService(selectOptionsRepository, termService)
 	selectOptionsHandler := selectoptions.NewSelectOptionsHandler(selectOptionsService)
 
 	studyPreferenceCollection := mongoClient.Database(cfg.MongoDB).Collection("study_preferences")
 	studyPreferenceRepository := studypreference.NewStudyPreferenceRepository(studyPreferenceCollection)
-	studyPreferenceService := studypreference.NewStudyPreferenceService(studyPreferenceRepository)
+	studyPreferenceService := studypreference.NewStudyPreferenceService(studyPreferenceRepository, termService)
 	studyPreferenceHandler := studypreference.NewStudyPreferenceHandler(studyPreferenceService)
 
 	router := gin.Default()
@@ -126,7 +128,7 @@ func main() {
 	studyprogram.RegisterRoutes(router, studyProgramHandler)
 	selectoptions.RegisterRoutes(router, selectOptionsHandler)
 	studypreference.RegisterRoutes(router, studyPreferenceHandler)
-	
+
 	defer func() {
 		if err := mongoClient.Disconnect(context.Background()); err != nil {
 			logger.Fatal(err)

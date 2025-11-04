@@ -48,6 +48,36 @@ func (h *StudyPreferenceHandler) CreateStudyPreference(c *gin.Context) {
 	helper.SendSuccess(c, http.StatusOK, "Create study preference successfully", studyPreferenceID)
 }
 
+func (h *StudyPreferenceHandler) GetStudyPreferencesByStudentID(c *gin.Context) {
+	studentID := c.Query("student_id")
+	if studentID == "" {
+		helper.SendError(c, http.StatusBadRequest, nil, "Student ID is required")
+		return
+	}
+
+	orgID := c.Query("organization_id")
+	if orgID == "" {
+		helper.SendError(c, http.StatusBadRequest, nil, "Organization ID is required")
+		return
+	}
+
+	token, exists := c.Get(constants.Token)
+	if !exists {
+		helper.SendError(c, http.StatusBadRequest, nil, "Token not found")
+		return
+	}
+
+	ctx := context.WithValue(c, constants.TokenKey, token)
+
+	studyPreferences, err := h.service.GetStudyPreferencesByStudentID(ctx, studentID, orgID)
+	if err != nil {
+		helper.SendError(c, http.StatusBadRequest, err, helper.ErrInvalidRequest)
+		return
+	}
+
+	helper.SendSuccess(c, http.StatusOK, "Get study preferences by student ID successfully", studyPreferences)
+}
+
 func (h *StudyPreferenceHandler) GetStudyPreferenceByID(c *gin.Context) {
 	
 	id := c.Param("id")

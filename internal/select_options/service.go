@@ -3,6 +3,7 @@ package selectoptions
 import (
 	"context"
 	"fmt"
+	"portal/internal/term"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,12 +14,14 @@ type SelectOptionsService interface {
 }
 
 type selectOptionsService struct {
-	repo SelectOptionsRepository
+	repo        SelectOptionsRepository
+	termService term.TermService
 }
 
-func NewSelectOptionsService(repo SelectOptionsRepository) SelectOptionsService {
+func NewSelectOptionsService(repo SelectOptionsRepository, termService term.TermService) SelectOptionsService {
 	return &selectOptionsService{
-		repo: repo,
+		repo:        repo,
+		termService: termService,
 	}
 }
 
@@ -30,10 +33,6 @@ func (s *selectOptionsService) CreateSelectOption(ctx context.Context, req Creat
 
 	if req.Type == "" {
 		return "", fmt.Errorf("type is required")
-	}
-
-	if req.TermID == "" {
-		return "", fmt.Errorf("term_id is required")
 	}
 
 	if req.StudentID == "" {
@@ -54,13 +53,22 @@ func (s *selectOptionsService) CreateSelectOption(ctx context.Context, req Creat
 		}
 	}
 
+	term, err := s.termService.GetCurrentTermByOrgID(ctx, req.OrganizationID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get current term by org id: %w", err)
+	}
+
+	if term == nil {
+		return "", fmt.Errorf("current term not found")
+	}
+
 	id := primitive.NewObjectID()
 
 	doc := &SelectOptions{
 		ID:             id,
 		OrganizationID: req.OrganizationID,
 		StudentID:      req.StudentID,
-		TermID:         req.TermID,
+		TermID:         term.ID,
 		Type:           req.Type,
 		Options:        req.Options,
 		CreatedBy:      userID,

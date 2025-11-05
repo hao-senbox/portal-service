@@ -47,10 +47,6 @@ func (s *studyPreferenceService) CreateStudyPreference(ctx context.Context, req 
 		return "", fmt.Errorf("organization_id is required")
 	}
 
-	if req.TermID == "" {
-		return "", fmt.Errorf("term_id is required")
-	}
-
 	if req.StudentID == "" {
 		return "", fmt.Errorf("student_id is required")
 	}
@@ -59,10 +55,19 @@ func (s *studyPreferenceService) CreateStudyPreference(ctx context.Context, req 
 		return "", fmt.Errorf("teacher_selection is required")
 	}
 
+	term, err := s.termService.GetCurrentTermByOrgID(ctx, req.OrganizationID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get current term by org id: %w", err)
+	}
+
+	if term == nil {
+		return "", fmt.Errorf("current term not found")
+	}
+
 	data := &StudyPreference{
 		ID:               primitive.NewObjectID(),
 		OrganizationID:   req.OrganizationID,
-		TermID:           req.TermID,
+		TermID:           term.ID,
 		StudentID:        req.StudentID,
 		ParentSelection:  []Data{},
 		TeacherSelection: req.TeacherSelection,

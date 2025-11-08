@@ -203,8 +203,6 @@ func (s *studyPreferenceService) GetStudyPreferencesByStudentID(ctx context.Cont
 	return data, nil
 }
 
-
-
 // func (s *studyPreferenceService) GetStudyPreferenceByID(ctx context.Context, id string) (*StudyPreference, error) {
 
 // 	if id == "" {
@@ -368,6 +366,31 @@ func (s *studyPreferenceService) GetStudyPreferenceStatistical(ctx context.Conte
 		}
 	} else {
 		result["select_topic"] = "No select topic"
+	}
+
+	studyPref, err := s.studyPreferenceRepository.GetStudyPreferencesByStudentID(ctx, studentID, term.ID, orgID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get study preference: %w", err)
+	}
+	
+	if studyPref != nil && len(studyPref.ParentSelection) > 0 {
+		var formattedSelections []string
+		for _, selection := range studyPref.ParentSelection {
+			if len(selection.Pairs) > 0 {
+				var pairStrings []string
+				for _, pair := range selection.Pairs {
+					pairStrings = append(pairStrings, fmt.Sprintf("%s %d%%", pair.Category, pair.Value))
+				}
+				if len(pairStrings) > 0 {
+					formattedSelections = append(formattedSelections, strings.Join(pairStrings, " - "))
+				}
+			}
+		}
+		if len(formattedSelections) > 0 {
+			result["parent_selections"] = strings.Join(formattedSelections, ", ")
+		}
+	} else {
+		result["parent_selections"] = "No parent selections"
 	}
 
 	return result, nil

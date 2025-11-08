@@ -60,6 +60,9 @@ func (r *studyPreferenceRepository) GetStudyPreferencesByStudentID(ctx context.C
 
 	err := r.collection.FindOne(ctx, filter).Decode(&studyPreference)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
 		return nil, err
 	}
 

@@ -16,7 +16,7 @@ type ActivitySummary struct {
 
 type ActivitySummaryData struct {
 	TotalSessions int                    `json:"total_sessions"`
-	Statistics    map[string]interface{} `json:"statistics"`
+	Statistics    interface{} `json:"statistics"`
 }
 
 type ActivityDetail struct {
@@ -28,4 +28,5 @@ type ActivityDetail struct {
 	CreatedAt    time.Time             `json:"created_at"`
 	UpdatedAt    time.Time             `json:"updated_at"`
 }
+
 

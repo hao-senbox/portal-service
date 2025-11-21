@@ -299,10 +299,10 @@ func (s *portalService) generateFluidsStatistics(details []ActivityDetail) map[s
 
 	return map[string]interface{}{
 		"water":     fmt.Sprintf("%dml", totalWater),
-		"juice":     fmt.Sprintf("%dml", totalJuice),
-		"smoothies": fmt.Sprintf("%dml", totalSmoothies),
+		// "juice":     fmt.Sprintf("%dml", totalJuice),
+		// "smoothies": fmt.Sprintf("%dml", totalSmoothies),
 		"milk":      fmt.Sprintf("%dml", totalMilk),
-		"other":     fmt.Sprintf("%dml", totalOther),
+		// "other":     fmt.Sprintf("%dml", totalOther),
 	}
 
 }

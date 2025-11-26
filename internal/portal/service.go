@@ -179,8 +179,6 @@ func (s *portalService) generateStatistics(typeActivity string, details []Activi
         return s.generateSleepRestStatistics(details)
     case "toileting":
         return s.generateToiletingStatistics(details)
-    // case "fluids":
-    //  return s.generateFluidsStatistics(details)
     case "work":
         return s.generateWorkStatistics(details)
     case "exercise":
@@ -267,52 +265,6 @@ func (s *portalService) generateSocialPlayStatistics(details []ActivityDetail) m
 func (s *portalService) generateWorkStatistics(details []ActivityDetail) map[string]interface{} {
     return nil
 }
-
-// func (s *portalService) generateFluidsStatistics(details []ActivityDetail) map[string]interface{} {
-
-//  var totalWater int
-//  var totalJuice int
-//  var totalSmoothies int
-//  var totalMilk int
-//  var totalOther int
-
-//  for _, detail := range details {
-//      for _, d := range detail.Data {
-//          switch d.Key {
-//          case "water":
-//              if value, ok := s.parseFluidsValue(d.Value); ok {
-//                  fmt.Printf("water: %v\n", value)
-//                  totalWater += value
-//              }
-//          case "juice":
-//              if value, ok := s.parseFluidsValue(d.Value); ok {
-//                  totalJuice += value
-//              }
-//          case "smoothie":
-//              if value, ok := s.parseFluidsValue(d.Value); ok {
-//                  totalSmoothies += value
-//              }
-//          case "milk":
-//              if value, ok := s.parseFluidsValue(d.Value); ok {
-//                  totalMilk += value
-//              }
-//          case "other_fluid":
-//              if value, ok := s.parseFluidsValue(d.Value); ok {
-//                  totalOther += value
-//              }
-//          }
-//      }
-//  }
-
-//  return map[string]interface{}{
-//      "water": fmt.Sprintf("%dml", totalWater),
-//      "milk":  fmt.Sprintf("%dml", totalMilk),
-//      // "juice":     fmt.Sprintf("%dml", totalJuice),
-//      // "smoothies": fmt.Sprintf("%dml", totalSmoothies),
-//      // "other":     fmt.Sprintf("%dml", totalOther),
-//  }
-
-// }
 
 func (s *portalService) generateToiletingStatistics(details []ActivityDetail) map[string]interface{} {
 

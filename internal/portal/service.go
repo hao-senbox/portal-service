@@ -278,8 +278,12 @@ func (s *portalService) generateToiletingStatistics(details []ActivityDetail) ma
             switch d.Key {
             case "number_1":
                 value := strings.ToLower(d.Value)
-                if strings.Contains(value, "nothing") {
-                    number1 -= 1
+                if strings.Contains(value, "nothing") || strings.Contains(strings.ToLower(value), "independent") {
+                    if number1 == 0 {
+                        number1 = 0
+                    } else {
+                        number1 -= 1
+                    }
                 } else if strings.Contains(value, "small") {
                     number1 += 1
                 } else if strings.Contains(value, "big") {
@@ -287,7 +291,7 @@ func (s *portalService) generateToiletingStatistics(details []ActivityDetail) ma
                 }
             case "number_2":
                 value := strings.ToLower(d.Value)
-                if strings.Contains(value, "nothing") {
+                if strings.Contains(value, "nothing") || strings.Contains(strings.ToLower(value), "independent") {
                     if number2 == 0 {
                         number2 = 0
                     } else {
@@ -300,7 +304,7 @@ func (s *portalService) generateToiletingStatistics(details []ActivityDetail) ma
                 }
             case "number_3":
                 value := strings.ToLower(d.Value)
-                if strings.Contains(value, "nothing") {
+                if strings.Contains(value, "nothing") || strings.Contains(strings.ToLower(value), "independent") {
                     if number3 == 0 {
                         number3 = 0
                     } else {

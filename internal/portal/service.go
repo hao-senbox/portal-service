@@ -657,7 +657,6 @@ func (s *portalService) generateAttendanceStatistics(details []ActivityDetail) m
 	}
 
 	return map[string]interface{}{
-		"total_records":  len(details),
 		"check_in_time":  checkInTime,
 		"check_out_time": checkOutTime,
 	}

@@ -1,8 +1,11 @@
 package portal
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"portal/helper"
+	"portal/pkg/constants"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,7 +42,15 @@ func (h *PortalHandlers) GetAllStudentActivity(c *gin.Context) {
 	studentId := c.Query("student_id")
 	date := c.Query("date")
 
-	activities, err := h.portalService.GetAllStudentActivity(c.Request.Context(), studentId, date)
+	token, exists := c.Get(constants.Token)
+	if !exists {
+		helper.SendError(c, 400, fmt.Errorf("token not found"), helper.ErrInvalidRequest)
+		return
+	}
+
+	ctx := context.WithValue(c, constants.TokenKey, token)
+
+	activities, err := h.portalService.GetAllStudentActivity(ctx, studentId, date)
 	if err != nil {
 		helper.SendError(c, http.StatusInternalServerError, err, helper.ErrInvalidOperation)
 		return

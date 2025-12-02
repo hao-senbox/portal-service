@@ -60,8 +60,8 @@ type Config struct {
 func LoadConfig() *Config {
 	config := &Config{
 		Port:     getEnv("PORT", "8086"),
-		MongoURI: getEnv("MONGO_URI", "mongodb://localhost:27019"),
-		MongoDB:  getEnv("MONGO_DB", "portal"),
+		MongoURI: getEnv("MONGO_URI", "mongodb://localhost:27017"),
+		MongoDB:  getEnv("MONGO_DB", "portal_service_db"),
 		Consul: Consul{
 			Host: getEnv("CONSUL_HOST", "localhost"),
 			Port: getEnv("CONSUL_PORT", "8500"),

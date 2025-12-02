@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"portal/config"
+	"portal/internal/attendance"
 	"portal/internal/bmi"
 	"portal/internal/body"
 	"portal/internal/drink"
@@ -60,6 +61,7 @@ func main() {
 	imageService := uploader.NewImageService(consulClient)
 	termService := term.NewTermService(consulClient)
 	topicService := topic.NewTopicService(consulClient)
+	attendanceService := attendance.NewAttendanceService(consulClient)
 
 	drinkCollection := mongoClient.Database(cfg.MongoDB).Collection("drinks")
 	drinkRepository := drink.NewDrinkRepository(drinkCollection)
@@ -84,7 +86,7 @@ func main() {
 
 	portalCollection := mongoClient.Database(cfg.MongoDB).Collection("portals")
 	portalRepository := portal.NewPortalRepository(portalCollection)
-	portalService := portal.NewPortalService(portalRepository)
+	portalService := portal.NewPortalService(portalRepository, attendanceService)
 	portalHandler := portal.NewPortalHandlers(portalService)
 
 	iebCollection := mongoClient.Database(cfg.MongoDB).Collection("iebs")

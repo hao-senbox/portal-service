@@ -622,15 +622,11 @@ func (s *portalService) createAttendanceDetails(attendances []attendancePkg.Atte
 func (s *portalService) generateAttendanceStatistics(details []ActivityDetail) map[string]interface{} {
 	if len(details) == 0 {
 		return map[string]interface{}{
-			"total_records":   0,
-			"temperature_avg": "0.00°C",
-			"check_in_time":   "00:00",
-			"check_out_time":  "00:00",
+			"check_in_time":  "00:00",
+			"check_out_time": "00:00",
 		}
 	}
 
-	totalTemp := 0.0
-	validReadings := 0
 	var checkInTime string
 	var checkOutTime string
 
@@ -642,26 +638,13 @@ func (s *portalService) generateAttendanceStatistics(details []ActivityDetail) m
 			if data.Key == "check_out_time" {
 				checkOutTime = s.convertToLocalTime(data.Value)
 			}
-			if data.Key == "temperature" {
-				if temp, err := strconv.ParseFloat(data.Value, 64); err == nil {
-					totalTemp += temp
-					validReadings++
-				}
-			}
 		}
 	}
 
-	var avgTemp float64
-	if validReadings > 0 {
-		avgTemp = totalTemp / float64(validReadings)
-	}
-
 	return map[string]interface{}{
-		"total_records":        len(details),
-		"temperature_avg":      fmt.Sprintf("%.2f°C", avgTemp),
-		"temperature_readings": validReadings,
-		"check_in_time":        checkInTime,
-		"check_out_time":       checkOutTime,
+		"total_records":  len(details),
+		"check_in_time":  checkInTime,
+		"check_out_time": checkOutTime,
 	}
 }
 
@@ -687,5 +670,5 @@ func (s *portalService) convertToLocalTime(utcTimeStr string) string {
 	}
 
 	parsedTime = parsedTime.Add(time.Hour * 7)
-	return parsedTime.Format("15:04")
+	return parsedTime.Format("Monday, 02 January 2006 15:04:05")
 }

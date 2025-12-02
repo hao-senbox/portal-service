@@ -156,6 +156,8 @@ func (u *attendanceService) GetAttendanceInfor(ctx context.Context, userID strin
 		attendanceInfo := &AttendanceUserInfo{
 			AttendanceID: getString(recordMap, "id"),
 			StudentID:    getString(recordMap, "user_id"),
+			CheckInTime:  getString(recordMap, "check_in_time"),
+			CheckOutTime: getString(recordMap, "check_out_time"),
 			Date:         getString(recordMap, "date"),
 			Temperature:  castToFloat64(recordMap["temperature"]),
 		}

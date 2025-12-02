@@ -218,8 +218,29 @@ func (s *portalService) groupActivitiesByType(activities []*StudentActivity, att
 			statistics = s.generateStatistics(typeActivity, details)
 		}
 
+		var iconActivity string
+		switch typeActivity {
+		case "sleep_rest":
+			iconActivity = "https://d2tlyqjp4runby.cloudfront.net/icon/sleep_1745222189420201389.png?Expires=2060754989&Signature=Lp7LvFS0NHcONq7R4XuiY4A91~5V41PMI9hwsZFRHsljwbQluw90Q06v-YVTkpKWFv1thAIwtAcyu7bzAxqoaJYGDgpBYpHTyOkXeUgSJvtx4k920I5e7pdkf6eDTkfGPD~vhysdgCjAK-O0uCWdGMBYFwxdAkocz-1qlUIzdd5ff1xosWVbjibtRxH2pCXuLeQKB-d-XQypq58yD0Z1iAd-UYH2FrTflyJ8NGNfQ70RYjGMALohNuSVRoPTm-ohjRI9bUZHUNFQOpOv06C5x4a16bQHefvjmC7QSjHzpIGjDajLz--DkKASHKhzyD68gvFlwKtxOvvA6e9I7sjPYw__&Key-Pair-Id=K1RAOUJU1Q3EVC"
+		case "toileting":
+			iconActivity = "https://d2tlyqjp4runby.cloudfront.net/icon/toilet_1745224065496239098.png?Expires=2060756865&Signature=BltiDLMHWiHCf2xesPhgKbbSXzyN1e1SSqOAKDRIKLL9tEKyrHOQz89Zk~QKH2fjJjn1vxX3nTRCPiCX77-KaCctMQzCBUnXt7PcZSKPUStdrwrtsKgYxp5THUGPMpfhiF0-e8pQbYFeHsC0UKL3cXj67C8QQTBavEavb1ouXd3CSSOl8arIy865ONSugfaTexOKOtvJhsN27SNWo9rKxfOyXxlNhigS5nmQIaiWDLsCY6pSl48PXA8gAf6TqS5GQqbod9iGNQ7jydZ3GTe0IDtBvQVtOID0NnJ12bfRjx~UrZi7FJpb8T3JTMQWqssT3x2s3BgpnlrMJKF0YIR62Q__&Key-Pair-Id=K1RAOUJU1Q3EVC"
+		case "work":
+			iconActivity = ""
+		case "exercise":
+			iconActivity = "https://d2tlyqjp4runby.cloudfront.net/icon/exercise_1752112181780773294.png?Expires=2067644981&Signature=BOygvPTyRzMOSlrKZ4o~2YuCFxZjGLbnZxCw6RMwXuH4vj8XZVgPIRjI~-4xpIYnY2PTF1gNEl3b08NaOGpcbVOe~URkwdBCmMUyTtJ1FgzVtPB9j-FacVhsfZ2YykaHUTbT-4qoQlIyHy6fE1WR~qZ3jDOsQmN4PJQ-b8JYJFVkPIoBYLa1gDmDOwttnwdrmpEEfC~ifNpClu-bmGG~2kTDTXmQwuABJDYYghlz9kCQShz0SmKKzsNchFO9GoDBDOLui7w-1NwC0VFMGFcYUsDdS9V-0uP047Q9GzEbUz5suxfw0SHTcIZCrn1Uw-t5WHR9Wlrnlh7TGcjh3i8NYw__&Key-Pair-Id=K1RAOUJU1Q3EVC"
+		case "social_play":
+			iconActivity = ""
+		case "food":
+			iconActivity = "https://d2tlyqjp4runby.cloudfront.net/icon/food_1745212526517243774.png?Expires=2060745326&Signature=FJCg2pkO6mCDC9zu1gmolq9GGKuNRzEWYexuHeBU7nW9gFGUuQ3uSBEQ3FSzb191uWDJL1WXf3UTiLi0w4KciZ~9gyLoHKj1BaAGiB1kpsDw3uySHG2tOwoPs5fb89wwSlzpMEtLfzKk-zipzkyD1i7tSgWtGE6ZfgXyDQz8pOv~qUs9kBfmgNe2nTwqFnbwk4rwa6SDoYAn5TPy75uH2h1K3zom~zBnnJU9m0ZxnIKLNQhniDmA00kBwUeH1TYpTZHV6fISHM6vetRjVH~HK1YvJLUnLYOPVxlFAmeEFwddiV4VaK-atRXA6M-9-aBV-qxDV5vOVE5k7OqNcVdyww__&Key-Pair-Id=K1RAOUJU1Q3EVC"
+		case "fluids":
+			iconActivity = "https://d2tlyqjp4runby.cloudfront.net/basic_visual_eng/food_1758783957873460997.png?Expires=2074316757&Signature=d5U4rIj2~0GCa1D5zLQkr4lwJPpCx72af6c~qr0jcZmfrJBMmiK3oT0scPdx5mZ~hAaZpDmp4TacJFWJMhHgrhlq5~YLpQIOCyWalKPpTiZhpBBGdqNLKNxKFEQf1DUqwwzkWHoNey2ZwXZ1AIVyy27IbIeSShIXCjrx7GtQ5mtQjgPODivLPJMc-QJKgWK1O0bZ~pC6zJX501b~LGInERtDzdV6kVor-rsoF6Vie65x7tWossaPkfiLFcvk4jPY89KT~LTCs4yvedpfWu8GUBPBJ6tzdJlrsLxBi6YYHzIWSOhESdqKTheqN0ueTz2Tw1qD7hcogaKKRBAZ0SahMg__&Key-Pair-Id=K1RAOUJU1Q3EVC"
+		default:
+			return nil
+		}
+
 		summary := ActivitySummary{
 			TypeActivity: typeActivity,
+			IConActivity: iconActivity,
 			Summary: ActivitySummaryData{
 				TotalSessions: len(details),
 				Statistics:    statistics,
@@ -238,6 +259,7 @@ func (s *portalService) groupActivitiesByType(activities []*StudentActivity, att
 
 			attendanceSummary := ActivitySummary{
 				TypeActivity: "attendance",
+				IConActivity: "https://d2tlyqjp4runby.cloudfront.net/icon/senbox_attendance_app_1745221438037031118.png?Expires=2060754238&Signature=I1aJiMDCnW1OjXJMVeqlwZGcsnVDSQElAmsaISvIGXe~hbSMbYW~0rh8xW7tiVZfKL7e-0mWw0576JwidgCa7z4gkjdymPItDhfetiKocyvnY6Sr8wZZ8eNu9WaoVeT4sewJS82KWheHpPbFgpM-XoVY1iU22W-MjGkwmRnXKBbdix9adY1CXHpqOKyA1pVtSH20KZTg41ltOzmF52seFqszL4z2RYOWvuds9PcJUjg8bX6qOMIH3~D5fHXftCoJMJKR599Bo3zuwWgx-LLsGNa3utqjuzFJCACmRwBFjy6pN54zRWJEJ-hn0UyWS0WBE8y4U154GgEK9F9fXR2gJg__&Key-Pair-Id=K1RAOUJU1Q3EVC",
 				Summary: ActivitySummaryData{
 					TotalSessions: len(attendanceDetails),
 					Statistics:    attendanceStatistics,
@@ -560,6 +582,21 @@ func (s *portalService) createAttendanceDetails(attendances []attendancePkg.Atte
 				Value: info.Date,
 			},
 			{
+				Key:   "check_in_time",
+				Label: "Check In Time",
+				Value: info.CheckInTime,
+			},
+			{
+				Key:   "check_in_time",
+				Label: "Check In Time",
+				Value: info.CheckInTime,
+			},
+			{
+				Key:   "check_out_time",
+				Label: "Check Out Time",
+				Value: info.CheckOutTime,
+			},
+			{
 				Key:   "temperature",
 				Label: "Temperature",
 				Value: fmt.Sprintf("%.2f", info.Temperature),
@@ -587,14 +624,24 @@ func (s *portalService) generateAttendanceStatistics(details []ActivityDetail) m
 		return map[string]interface{}{
 			"total_records":   0,
 			"temperature_avg": "0.00°C",
+			"check_in_time":   "00:00",
+			"check_out_time":  "00:00",
 		}
 	}
 
 	totalTemp := 0.0
 	validReadings := 0
+	var checkInTime string
+	var checkOutTime string
 
 	for _, detail := range details {
 		for _, data := range detail.Data {
+			if data.Key == "check_in_time" {
+				checkInTime = s.convertToLocalTime(data.Value)
+			}
+			if data.Key == "check_out_time" {
+				checkOutTime = s.convertToLocalTime(data.Value)
+			}
 			if data.Key == "temperature" {
 				if temp, err := strconv.ParseFloat(data.Value, 64); err == nil {
 					totalTemp += temp
@@ -613,5 +660,32 @@ func (s *portalService) generateAttendanceStatistics(details []ActivityDetail) m
 		"total_records":        len(details),
 		"temperature_avg":      fmt.Sprintf("%.2f°C", avgTemp),
 		"temperature_readings": validReadings,
+		"check_in_time":        checkInTime,
+		"check_out_time":       checkOutTime,
 	}
+}
+
+func (s *portalService) convertToLocalTime(utcTimeStr string) string {
+	if utcTimeStr == "" {
+		return "00:00"
+	}
+
+	// Try parsing different possible formats
+	var parsedTime time.Time
+	var err error
+
+	// Format 1: ISO 8601 with timezone (2025-11-29T07:46:44.444Z)
+	if parsedTime, err = time.Parse(time.RFC3339, utcTimeStr); err != nil {
+		// Format 2: ISO 8601 without timezone (2025-11-29T07:46:44.444)
+		if parsedTime, err = time.Parse("2006-01-02T15:04:05.999", utcTimeStr); err != nil {
+			// Format 3: Simple time format (15:04:05)
+			if parsedTime, err = time.Parse("15:04:05", utcTimeStr); err != nil {
+				// If all parsing fails, return original string
+				return utcTimeStr
+			}
+		}
+	}
+
+	parsedTime = parsedTime.Add(time.Hour * 7)
+	return parsedTime.Format("15:04")
 }

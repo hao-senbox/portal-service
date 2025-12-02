@@ -10,12 +10,13 @@ type StudentDailyActivities struct {
 
 type ActivitySummary struct {
 	TypeActivity string              `bson:"type_activity" json:"type_activity"`
+	IConActivity string              `bson:"icon_activity" json:"icon_activity"`
 	Summary      ActivitySummaryData `json:"summary"`
 	Details      []ActivityDetail    `json:"details"`
 }
 
 type ActivitySummaryData struct {
-	TotalSessions int                    `json:"total_sessions"`
+	TotalSessions int         `json:"total_sessions"`
 	Statistics    interface{} `json:"statistics"`
 }
 

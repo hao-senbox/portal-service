@@ -526,6 +526,9 @@ func (s *portalService) parseFluidsValue(input string) (int, bool) {
 type FluidsOrdered struct {
 	Water string `json:"water"`
 	Milk  string `json:"milk"`
+	Juice string `json:"juice"`
+	Smoothies string `json:"smoothies"`
+	Other string `json:"other"`
 }
 
 func (s *portalService) generateFluidsStatisticsOrdered(details []ActivityDetail) FluidsOrdered {
@@ -565,6 +568,9 @@ func (s *portalService) generateFluidsStatisticsOrdered(details []ActivityDetail
 	return FluidsOrdered{
 		Water: fmt.Sprintf("%dml", totalWater),
 		Milk:  fmt.Sprintf("%dml", totalMilk),
+		Juice: fmt.Sprintf("%dml", totalJuice),
+		Smoothies: fmt.Sprintf("%dml", totalSmoothies),
+		Other: fmt.Sprintf("%dml", totalOther),
 	}
 }
 
